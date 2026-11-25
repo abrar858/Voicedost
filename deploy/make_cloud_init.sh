@@ -50,7 +50,7 @@ runcmd:
   - [bash, -c, "cd /opt/voicedost && tar xzf backend.tar.gz"]
   - [bash, -c, "python3 -m venv /opt/voicedost/venv && /opt/voicedost/venv/bin/pip install --upgrade pip && /opt/voicedost/venv/bin/pip install fastapi 'uvicorn[standard]' kokoro-onnx numpy soundfile pydantic"]
   - [bash, -c, "cd /opt/voicedost/backend && bash scripts/download_models.sh"]
-  - [bash, -c, "iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT; iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT; netfilter-persistent save || true"]
+  - [bash, -c, "N=\$(iptables -L INPUT --line-numbers -n | awk '/REJECT/{print \$1; exit}'); N=\${N:-1}; iptables -I INPUT \$N -m state --state NEW -p tcp --dport 443 -j ACCEPT; iptables -I INPUT \$N -m state --state NEW -p tcp --dport 80 -j ACCEPT; netfilter-persistent save || true"]
   - [systemctl, daemon-reload]
   - [systemctl, enable, --now, voicedost-api]
   - [systemctl, restart, caddy]
