@@ -7,8 +7,9 @@ Low-cost AI voiceovers in English and Hindi for YouTube, Reels and TikTok creato
 | Part | Folder | Status |
 |---|---|---|
 | Voice API (FastAPI + Kokoro) | `backend/` | Working: voices, text-to-speech to MP3/WAV, limits |
-| Test studio page | `web/index.html` | Working: paste script, pick voice, generate, download |
-| Website (Next.js), accounts, plans, Stripe | — | Next milestones |
+| Test studio page | `web/index.html` | Working: simple page served by the API |
+| Website (Next.js 16) | `frontend/` | Working: landing page with free try box, studio, 3 SEO tool pages, sitemap |
+| Accounts, plans, Stripe | — | Next milestones |
 
 Voices at launch: George (British), Emma (British), Michael (American), Hindi female, Hindi male.
 The engine is [Kokoro](https://github.com/thewh1teagle/kokoro-onnx) (Apache-2.0), which allows use in a paid product.
@@ -23,6 +24,18 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 Open http://localhost:8000 for the studio, or http://localhost:8000/docs for the API.
+
+## Run the website
+
+```bash
+cd frontend
+cp .env.example .env.local     # set NEXT_PUBLIC_API_URL if the API is elsewhere
+npm install
+npm run dev                    # http://localhost:3000
+```
+
+Pages: `/` (landing + try box), `/studio`, `/tools/hindi-text-to-speech`, `/tools/ai-voiceover-for-youtube`, `/tools/british-accent-text-to-speech`.
+Voice samples in `frontend/public/samples/` were generated with the API.
 
 ## Run with Docker
 
@@ -53,7 +66,7 @@ cd backend && pytest -q
 ## Roadmap
 
 1. ✅ Voice API and test studio
-2. Website (Next.js): landing page, SEO tool pages, studio
+2. ✅ Website (Next.js): landing page, SEO tool pages, studio
 3. Accounts and minute balances (Supabase)
 4. Plans, one-off packs and top-ups (Stripe)
 5. Admin panel, terms and privacy pages
