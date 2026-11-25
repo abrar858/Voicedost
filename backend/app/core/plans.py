@@ -9,11 +9,12 @@ class Plan:
     minutes_per_month: int
     price_gbp: float
     allows_wav: bool
-    commercial_use: bool  # [CONFIRM IN TERMS]
+    commercial_use: bool  # monetised videos allowed
+    rollover: bool = False  # plan minutes reset each month
 
 
 PLANS = {
-    "free": Plan("free", 10, 0.0, allows_wav=False, commercial_use=False),
+    "free": Plan("free", 10, 0.0, allows_wav=False, commercial_use=True),
     "starter": Plan("starter", 60, 3.0, allows_wav=True, commercial_use=True),
     "creator": Plan("creator", 180, 5.0, allows_wav=True, commercial_use=True),
 }

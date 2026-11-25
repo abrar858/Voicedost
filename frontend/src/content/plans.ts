@@ -23,9 +23,9 @@ export const PLANS: Plan[] = [
 ];
 
 export const FAQS = [
-  { q: "Can I use the voiceovers in monetised videos?", a: "[CONFIRM IN TERMS] Paid plans are intended to include commercial use for YouTube, TikTok and Reels." },
+  { q: "Can I use the voiceovers in monetised videos?", a: "Yes. You can use your voiceovers in monetised YouTube, TikTok, Reels and Facebook videos on every plan." },
   { q: "Which languages are available?", a: "British English, American English and Hindi at launch." },
   { q: "My card does not allow subscriptions. Can I still pay?", a: "Yes. Every plan can be bought as a one-off 30-day pack, with no automatic renewal." },
-  { q: "Do unused minutes roll over?", a: "[YOUR POLICY] Decide before launch." },
+  { q: "Do unused minutes roll over?", a: "No. Your plan minutes reset at the start of each month, so use them before then." },
   { q: "Can you make the whole video for me?", a: "Yes. See our done-for-you services for voiceovers, scripts and animated videos." },
 ];
