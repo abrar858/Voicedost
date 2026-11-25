@@ -6,6 +6,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 DOMAIN="${1:-api.voicedost.com}"
+# Public values (the publishable key is safe to share).
+SUPABASE_URL="${SUPABASE_URL:-https://sbvihkfiyxluaadwnclo.supabase.co}"
+SUPABASE_PUBLISHABLE_KEY="${SUPABASE_PUBLISHABLE_KEY:-sb_publishable_h_S42oG6g7Cwmyd8hgCPLA_gXtPPrHC}"
 ORIGINS="https://www.voicedost.com,https://voicedost.com,https://voicedost.vercel.app"
 TARB64=$(tar --exclude='__pycache__' --exclude='models' --exclude='tests' --exclude='.pytest_cache' -czf - backend | base64 -w0)
 cat > deploy/oracle-cloud-init.yaml <<YAML
@@ -33,6 +36,8 @@ write_files:
       WorkingDirectory=/opt/voicedost/backend
       Environment=VOICEDOST_ALLOWED_ORIGINS=${ORIGINS}
       Environment=VOICEDOST_MAX_CONCURRENT_JOBS=2
+      Environment=SUPABASE_URL=${SUPABASE_URL}
+      Environment=SUPABASE_PUBLISHABLE_KEY=${SUPABASE_PUBLISHABLE_KEY}
       Environment=VOICEDOST_MODELS_DIR=/opt/voicedost/backend/models
       ExecStart=/opt/voicedost/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
       Restart=always
@@ -48,7 +53,7 @@ write_files:
       }
 runcmd:
   - [bash, -c, "cd /opt/voicedost && tar xzf backend.tar.gz"]
-  - [bash, -c, "python3 -m venv /opt/voicedost/venv && /opt/voicedost/venv/bin/pip install --upgrade pip && /opt/voicedost/venv/bin/pip install fastapi 'uvicorn[standard]' kokoro-onnx numpy soundfile pydantic"]
+  - [bash, -c, "python3 -m venv /opt/voicedost/venv && /opt/voicedost/venv/bin/pip install --upgrade pip && /opt/voicedost/venv/bin/pip install fastapi 'uvicorn[standard]' kokoro-onnx numpy soundfile pydantic httpx"]
   - [bash, -c, "cd /opt/voicedost/backend && bash scripts/download_models.sh"]
   - [bash, -c, "N=\$(iptables -L INPUT --line-numbers -n | awk '/REJECT/{print \$1; exit}'); N=\${N:-1}; iptables -I INPUT \$N -m state --state NEW -p tcp --dport 443 -j ACCEPT; iptables -I INPUT \$N -m state --state NEW -p tcp --dport 80 -j ACCEPT; netfilter-persistent save || true"]
   - [systemctl, daemon-reload]

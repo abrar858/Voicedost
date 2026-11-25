@@ -5,8 +5,7 @@ import { Footer, ProductHeader } from "@/components/marketing/SiteChrome";
 export const metadata: Metadata = { robots: { index: false } };
 
 export default function ProductLayout({ children }: { children: React.ReactNode }) {
-  // [ACCOUNTS] When FEATURES.accounts is on, check getCurrentUser() here and
-  // redirect to /login if nobody is signed in (except /studio while it is open).
+  // Pages that need a login wrap their content in <RequireLogin>.
   return (
     <>
       <ProductHeader />

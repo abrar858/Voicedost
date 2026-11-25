@@ -1,15 +1,8 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/ui/ComingSoon";
+import { Dashboard } from "@/components/account/Dashboard";
 
-export const metadata: Metadata = { title: "Projects" };
+export const metadata: Metadata = { title: "Dashboard" };
 
 export default function DashboardPage() {
-  // [ACCOUNTS] list the user's projects (table: projects) and minutes left
-  return (
-    <ComingSoon
-      title="Your projects"
-      description="Once accounts are live, every voiceover you make is saved here."
-      items={["Recent projects with play and download", "Minutes used and left this month", "Duplicate a project to make a new version"]}
-    />
-  );
+  return <Dashboard />;
 }

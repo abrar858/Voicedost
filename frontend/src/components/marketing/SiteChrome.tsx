@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
+import { AccountLink } from "@/components/account/AccountLink";
 import { FOOTER_GROUPS, MAIN_NAV, PRODUCT_NAV, SITE } from "@/config/site";
 
 /** Header for public marketing pages. */
@@ -11,7 +12,7 @@ export function Header() {
         {MAIN_NAV.map((l) => (
           <Link key={l.href} href={l.href}>{l.label}</Link>
         ))}
-        <Link href="/login">Log in</Link>
+        <AccountLink />
         <Link href="/studio" className="btn btn-dark">Open studio</Link>
       </nav>
     </header>

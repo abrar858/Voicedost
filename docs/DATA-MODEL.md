@@ -1,6 +1,6 @@
-# Data model (planned, Supabase Postgres)
+# Data model (Supabase Postgres)
 
-Not created yet. This is the shape the code's placeholders expect.
+Live now: `profiles`, `minute_grants`, `usage_events` and the functions `account_summary()` and `record_usage()` (see `supabase/migrations/`). The rest is planned.
 
 | Table | Key columns | Purpose |
 |---|---|---|

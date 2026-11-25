@@ -64,6 +64,51 @@ def test_plans_match_site():
 
 
 def test_usage_is_unlimited_while_accounts_off():
+    import asyncio
     from app.services import usage
-    assert usage.minutes_left(None) is None
-    usage.check_minutes(None, 999)  # must not raise
+    asyncio.run(usage.check_minutes(None, 999))  # must not raise
+    assert asyncio.run(usage.record_usage(None, 1, "george", 10)) is None
+
+
+def test_try_rate_limit(monkeypatch):
+    from app.core import config
+    from app.services import ratelimit
+    monkeypatch.setattr(config, "TRY_PER_HOUR", 2)
+    ratelimit._hits.clear()
+    for _ in range(2):
+        client.post("/try", json={"text": "Hi", "voice": "nobody"}, headers={"x-forwarded-for": "9.9.9.9"})
+    r = client.post("/try", json={"text": "Hi", "voice": "george"}, headers={"x-forwarded-for": "9.9.9.9"})
+    assert r.status_code == 429
+    ratelimit._hits.clear()
+
+
+def test_accounts_on_requires_login(monkeypatch):
+    from app.core import config
+    monkeypatch.setattr(config, "ACCOUNTS_ON", True)
+    r = client.post("/tts", json={"text": "Hello", "voice": "george"})
+    assert r.status_code == 401
+    assert client.get("/me").status_code == 401
+
+
+def test_accounts_counts_minutes(monkeypatch):
+    from app.core import config
+    from app.services import supabase
+    monkeypatch.setattr(config, "ACCOUNTS_ON", True)
+    calls = []
+
+    async def fake_user(token):
+        return {"id": "u1", "email": "a@b.c"} if token == "good" else None
+
+    async def fake_rpc(token, name, **params):
+        calls.append(name)
+        if name == "account_summary":
+            return [{"plan": "free", "plan_minutes": 10, "plan_left": 0.01, "topup_left": 0,
+                     "minutes_left": 0.01, "period_end": "2026-12-01T00:00:00Z", "is_admin": False}]
+        return 0
+
+    monkeypatch.setattr(supabase, "user_from_token", fake_user)
+    monkeypatch.setattr(supabase, "rpc", fake_rpc)
+    h = {"Authorization": "Bearer good"}
+    assert client.get("/me", headers=h).json()["plan"] == "free"
+    r = client.post("/tts", json={"text": "Hello there. " * 40, "voice": "george"}, headers=h)
+    assert r.status_code == 402

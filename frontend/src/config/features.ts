@@ -5,13 +5,18 @@
  */
 const on = (v: string | undefined) => v === "1" || v === "true";
 
+const accounts =
+  on(process.env.NEXT_PUBLIC_FEATURE_ACCOUNTS) &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
 export const FEATURES = {
   /** Sign up, log in, dashboard, minute balances. */
-  accounts: on(process.env.NEXT_PUBLIC_FEATURE_ACCOUNTS),
+  accounts,
   /** Stripe checkout for plans, packs and top-ups. */
   payments: on(process.env.NEXT_PUBLIC_FEATURE_PAYMENTS),
   /** Admin panel. */
   admin: on(process.env.NEXT_PUBLIC_FEATURE_ADMIN),
-  /** Studio open to everyone without an account (testing phase). */
-  openStudio: process.env.NEXT_PUBLIC_FEATURE_OPEN_STUDIO !== "0",
+  /** Studio open to everyone without an account (only while accounts are off). */
+  openStudio: !accounts,
 };

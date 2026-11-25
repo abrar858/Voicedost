@@ -25,3 +25,14 @@ MAX_CONCURRENT_JOBS = _int("VOICEDOST_MAX_CONCURRENT_JOBS", 2)
 # Comma-separated list of website origins allowed to call the API.
 ALLOWED_ORIGINS = [o.strip() for o in os.environ.get(
     "VOICEDOST_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",") if o.strip()]
+
+# Accounts (Supabase). Leave SUPABASE_URL empty to keep accounts switched off:
+# then the studio is open to everyone and nothing is counted.
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+# Publishable key (sb_publishable_...). Public, not a secret: the server acts
+# with each user's own login token, so no secret key is needed.
+SUPABASE_KEY = os.environ.get("SUPABASE_PUBLISHABLE_KEY", "")
+ACCOUNTS_ON = bool(SUPABASE_URL and SUPABASE_KEY)
+
+# Free "try it" box: generations allowed per visitor (IP) per hour.
+TRY_PER_HOUR = _int("VOICEDOST_TRY_PER_HOUR", 10)

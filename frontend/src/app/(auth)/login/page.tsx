@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FEATURES } from "@/config/features";
+import { AuthForm } from "@/components/account/AuthForm";
 
 export const metadata: Metadata = { title: "Log in" };
 
@@ -14,14 +15,5 @@ export default function LoginPage() {
       </div>
     );
   }
-  // [ACCOUNTS] email-link and Google sign-in form, calling signIn() from @/lib/auth
-  return (
-    <form className="stack">
-      <h1 style={{ fontSize: 36 }}>Log in</h1>
-      <label htmlFor="email" style={{ fontWeight: 600 }}>Email</label>
-      <input id="email" type="email" autoComplete="email" required />
-      <button type="submit" className="btn btn-dark">Send me a sign-in link</button>
-      <p className="muted">New here? <Link href="/signup">Create a free account</Link></p>
-    </form>
-  );
+  return <AuthForm mode="login" />;
 }

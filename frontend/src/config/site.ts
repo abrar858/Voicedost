@@ -22,7 +22,7 @@ export const MAIN_NAV: NavLink[] = [
 
 export const PRODUCT_NAV: NavLink[] = [
   { href: "/studio", label: "Studio" },
-  { href: "/dashboard", label: "Projects" },
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/account/billing", label: "Billing" },
   { href: "/account", label: "Account" },
 ];

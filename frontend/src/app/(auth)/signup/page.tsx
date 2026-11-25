@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FEATURES } from "@/config/features";
+import { AuthForm } from "@/components/account/AuthForm";
 
 export const metadata: Metadata = { title: "Create a free account" };
 
@@ -14,16 +15,5 @@ export default function SignupPage() {
       </div>
     );
   }
-  // [ACCOUNTS] sign-up form: email + accept terms, calling signIn() from @/lib/auth
-  return (
-    <form className="stack">
-      <h1 style={{ fontSize: 36 }}>Create a free account</h1>
-      <label htmlFor="email" style={{ fontWeight: 600 }}>Email</label>
-      <input id="email" type="email" autoComplete="email" required />
-      <label className="row" style={{ gap: 8 }}>
-        <input type="checkbox" required style={{ width: 20, minHeight: 20 }} /> I agree to the <Link href="/legal/terms">terms of use</Link>
-      </label>
-      <button type="submit" className="btn btn-orange">Start free</button>
-    </form>
-  );
+  return <AuthForm mode="signup" />;
 }
