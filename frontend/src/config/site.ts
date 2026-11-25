@@ -5,7 +5,7 @@ export const SITE = {
   tagline: "Your voiceover dost.",
   description:
     "Natural AI voiceovers in English and Hindi. Paste your script, pick a voice and download an MP3 in seconds.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://voicedost.com",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.voicedost.com",
   // [SET UP] create this mailbox (e.g. forward to Gmail) before launch
   email: "hello@voicedost.com",
 };
