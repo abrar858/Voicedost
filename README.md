@@ -8,11 +8,15 @@ Low-cost AI voiceovers in English and Hindi for YouTube, Reels and TikTok creato
 |---|---|---|
 | Voice API (FastAPI + Kokoro) | `backend/` | Working: voices, text-to-speech to MP3/WAV, limits |
 | Test studio page | `web/index.html` | Working: simple page served by the API |
-| Website (Next.js 16) | `frontend/` | Working: landing page with free try box, studio, 3 SEO tool pages, sitemap |
-| Accounts, plans, Stripe | — | Next milestones |
+| Website (Next.js 16) | `frontend/` | Working: marketing site (voices, pricing, use cases, services, free tools, blog, about, contact, legal outlines) and studio |
+| Accounts, billing, admin | `frontend/src/lib/auth`, `lib/billing`, `backend/app/services` | Structure and placeholders ready, switched off |
 
 Voices at launch: George (British), Emma (British), Michael (American), Hindi female, Hindi male.
 The engine is [Kokoro](https://github.com/thewh1teagle/kokoro-onnx) (Apache-2.0), which allows use in a paid product.
+
+## How it is organised
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the folder structure, request flow and the steps to switch on accounts and payments, and [docs/DATA-MODEL.md](docs/DATA-MODEL.md) for the planned database.
 
 ## Run it locally
 
@@ -34,7 +38,7 @@ npm install
 npm run dev                    # http://localhost:3000
 ```
 
-Pages: `/` (landing + try box), `/studio`, `/tools/hindi-text-to-speech`, `/tools/ai-voiceover-for-youtube`, `/tools/british-accent-text-to-speech`.
+Main pages: `/`, `/voices`, `/pricing`, `/use-cases`, `/services`, `/tools`, `/blog`, `/about`, `/contact`, `/legal/*`, `/studio`. Placeholders: `/login`, `/signup`, `/dashboard`, `/account`, `/account/billing`, `/admin`.
 Voice samples in `frontend/public/samples/` were generated with the API.
 
 ## Run with Docker
@@ -67,7 +71,8 @@ cd backend && pytest -q
 
 1. ✅ Voice API and test studio
 2. ✅ Website (Next.js): landing page, SEO tool pages, studio
-3. Accounts and minute balances (Supabase)
-4. Plans, one-off packs and top-ups (Stripe)
-5. Admin panel, terms and privacy pages
-6. Deploy: API on a 4-core server, website on Vercel
+3. ✅ Site structure for marketing, product, accounts, billing and admin
+4. Accounts and minute balances (Supabase)
+5. Plans, one-off packs and top-ups (Stripe)
+6. Admin panel, terms and privacy pages
+7. Deploy: API on a 4-core server, website on Vercel

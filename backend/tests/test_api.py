@@ -1,7 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app import config, tts
+from app.core import config
+from app.services import tts
 from app.main import app
 
 client = TestClient(app)
@@ -53,3 +54,16 @@ def test_generates_audio(voice, fmt):
     assert len(r.content) > 1000
     if fmt == "wav":
         assert r.content[:4] == b"RIFF"
+
+
+def test_plans_match_site():
+    from app.core.plans import PLANS
+    assert PLANS["free"].minutes_per_month == 10
+    assert PLANS["starter"].minutes_per_month == 60
+    assert PLANS["creator"].minutes_per_month == 180
+
+
+def test_usage_is_unlimited_while_accounts_off():
+    from app.services import usage
+    assert usage.minutes_left(None) is None
+    usage.check_minutes(None, 999)  # must not raise

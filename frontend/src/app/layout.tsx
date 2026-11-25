@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Header, Footer } from "@/components/SiteChrome";
-import { SITE_URL } from "@/lib/content";
+import { SITE } from "@/config/site";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: "VoiceDost – Natural AI Voiceovers in English and Hindi",
-  description:
-    "Paste your script, pick a natural English or Hindi voice and download an MP3 in seconds. Free plan, paid plans from £3.",
+  metadataBase: new URL(SITE.url),
+  title: { default: `${SITE.name} – Natural AI Voiceovers in English and Hindi`, template: `%s | ${SITE.name}` },
+  description: SITE.description,
   openGraph: {
-    title: "VoiceDost – Your voiceover dost",
-    description: "Natural AI voiceovers in English and Hindi for YouTube, Reels and TikTok.",
-    url: SITE_URL,
-    siteName: "VoiceDost",
+    title: `${SITE.name} – ${SITE.tagline}`,
+    description: SITE.description,
+    url: SITE.url,
+    siteName: SITE.name,
     type: "website",
   },
 };
@@ -29,11 +27,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           rel="stylesheet"
         />
       </head>
-      <body>
-        <Header />
-        <main>{children}</main>
-        <Footer />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
