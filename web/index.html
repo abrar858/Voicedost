@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VoiceDost Studio (dev)</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --orange:#F97316; --orange-ink:#C2410C; --navy:#14213D; --navy-2:#22305A; --cream:#FFF7ED; --muted:#5B6478; }
+  * { box-sizing: border-box; }
+  body { margin:0; font: 16px/1.5 Inter, system-ui, sans-serif; color: var(--navy); background: var(--cream); }
+  header { display:flex; align-items:center; gap:10px; padding:16px 24px; background:#fff; border-bottom:1px solid #FED7AA; }
+  .brand { font-family:'Baloo 2', sans-serif; font-weight:800; font-size:26px; }
+  .brand span { color: var(--orange-ink); }
+  main { max-width: 860px; margin: 0 auto; padding: 24px; display:flex; flex-direction:column; gap:20px; }
+  .card { background:#fff; border-radius:20px; padding:24px; display:flex; flex-direction:column; gap:16px; }
+  label { font-weight:600; }
+  textarea { width:100%; min-height:180px; font:16px/1.5 Inter, sans-serif; padding:14px; border:1px solid #CBD5E1; border-radius:14px; resize:vertical; }
+  .row { display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { font:600 15px Inter, sans-serif; border:2px solid var(--navy); background:#fff; color:var(--navy); border-radius:999px; padding:10px 16px; min-height:44px; cursor:pointer; }
+  .chip[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); }
+  .primary { font:700 17px Inter, sans-serif; background:var(--navy); color:#fff; border:0; border-radius:999px; padding:14px 28px; min-height:48px; cursor:pointer; }
+  .primary:disabled { opacity:.6; cursor:wait; }
+  input[type=range] { width:180px; }
+  .muted { color: var(--muted); font-size:14px; }
+  .error { color:#B91C1C; font-weight:600; }
+  audio { width:100%; }
+  a.download { font-weight:700; color: var(--orange-ink); }
+</style>
+</head>
+<body>
+<header>
+  <svg width="36" height="36" viewBox="0 0 40 40" aria-hidden="true"><path d="M8 4h24a6 6 0 0 1 6 6v14a6 6 0 0 1-6 6H18l-8 7v-7H8a6 6 0 0 1-6-6V10a6 6 0 0 1 6-6z" fill="#F97316"/><rect x="11" y="14" width="3" height="8" rx="1.5" fill="#fff"/><rect x="16.5" y="10" width="3" height="16" rx="1.5" fill="#fff"/><rect x="22" y="12" width="3" height="12" rx="1.5" fill="#fff"/><rect x="27.5" y="15" width="3" height="6" rx="1.5" fill="#fff"/></svg>
+  <div class="brand">Voice<span>Dost</span> Studio</div>
+</header>
+<main>
+  <section class="card">
+    <label for="script">Your script</label>
+    <textarea id="script">Welcome back to the channel! Today I will show you three easy ways to save money on your weekly shop.
+
+Let's get started.</textarea>
+    <div class="muted" id="count"></div>
+    <div>
+      <div style="font-weight:600; margin-bottom:8px">Voice</div>
+      <div class="chips" id="voices" role="group" aria-label="Voice"></div>
+    </div>
+    <div class="row">
+      <label for="speed">Speed <span id="speedVal">1.0×</span></label>
+      <input id="speed" type="range" min="0.5" max="2" step="0.1" value="1">
+      <label for="pause">Pause between lines <span id="pauseVal">350 ms</span></label>
+      <input id="pause" type="range" min="0" max="1500" step="50" value="350">
+    </div>
+    <div class="row">
+      <button class="primary" id="go" type="button">Generate voice</button>
+      <span class="muted" id="status" role="status"></span>
+    </div>
+  </section>
+  <section class="card" id="result" hidden>
+    <audio id="player" controls></audio>
+    <div class="row">
+      <a class="download" id="dl" href="#">Download MP3</a>
+      <span class="muted" id="meta"></span>
+    </div>
+  </section>
+</main>
+<script>
+{
+  const API = '';  // same origin in development
+  const $ = (id) => document.getElementById(id);
+  let voice = 'george';
+
+  const updateCount = () => {
+    const n = $('script').value.trim().length;
+    $('count').textContent = `${n.toLocaleString()} characters · about ${Math.max(1, Math.round(n / 1070 * 60))} seconds of audio`;
+  };
+
+  async function loadVoices() {
+    const res = await fetch(API + '/voices');
+    const list = await res.json();
+    const box = $('voices');
+    box.replaceChildren();
+    for (const v of list) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = `${v.name} · ${v.language}`;
+      b.setAttribute('aria-pressed', String(v.id === voice));
+      b.addEventListener('click', () => {
+        voice = v.id;
+        for (const c of box.children) c.setAttribute('aria-pressed', 'false');
+        b.setAttribute('aria-pressed', 'true');
+      });
+      box.append(b);
+    }
+  }
+
+  async function generate() {
+    const btn = $('go');
+    btn.disabled = true;
+    $('status').className = 'muted';
+    $('status').textContent = 'Generating…';
+    try {
+      const res = await fetch(API + '/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: $('script').value,
+          voice,
+          speed: Number($('speed').value),
+          pause_ms: Number($('pause').value),
+          format: 'mp3',
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Error ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      $('player').src = url;
+      $('dl').href = url;
+      $('dl').download = `voicedost-${voice}.mp3`;
+      $('meta').textContent = `${res.headers.get('X-Audio-Seconds')} s · ${res.headers.get('X-Lines')} lines · ${res.headers.get('X-Minutes-Used')} minutes used`;
+      $('result').hidden = false;
+      $('status').textContent = 'Done.';
+    } catch (e) {
+      $('status').className = 'error';
+      $('status').textContent = e.message;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  $('script').addEventListener('input', updateCount);
+  $('speed').addEventListener('input', () => $('speedVal').textContent = `${Number($('speed').value).toFixed(1)}×`);
+  $('pause').addEventListener('input', () => $('pauseVal').textContent = `${$('pause').value} ms`);
+  $('go').addEventListener('click', generate);
+  updateCount();
+  loadVoices().catch(() => { $('status').className = 'error'; $('status').textContent = 'Cannot reach the API.'; });
+}
+</script>
+</body>
+</html>
