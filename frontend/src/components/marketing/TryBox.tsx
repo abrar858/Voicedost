@@ -51,7 +51,7 @@ export function TryBox({ defaultText, defaultVoice = "george" }: { defaultText: 
             aria-pressed={voice === v.id}
             onClick={() => setVoice(v.id)}
           >
-            {v.name}{v.language === "Hindi" ? "" : ` · ${v.language.replace(" English", "")}`}
+            {v.name} · {v.language.replace(" English", "")}
           </button>
         ))}
       </div>

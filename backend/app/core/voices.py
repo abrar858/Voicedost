@@ -23,8 +23,8 @@ VOICES = [
     Voice("george", "George", "British English", "male", "bm_george", "en-gb"),
     Voice("emma", "Emma", "British English", "female", "bf_emma", "en-gb"),
     Voice("michael", "Michael", "American English", "male", "am_michael", "en-us"),
-    Voice("hindi-female", "Hindi · Female", "Hindi", "female", "hf_alpha", "hi"),
-    Voice("hindi-male", "Hindi · Male", "Hindi", "male", "hm_omega", "hi"),
+    Voice("hindi-female", "Priya", "Hindi", "female", "hf_alpha", "hi"),
+    Voice("hindi-male", "Arjun", "Hindi", "male", "hm_omega", "hi"),
 ]
 
 VOICES_BY_ID = {v.id: v for v in VOICES}

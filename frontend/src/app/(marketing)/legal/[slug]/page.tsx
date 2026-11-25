@@ -20,12 +20,15 @@ export default async function LegalPage({ params }: PageProps<"/legal/[slug]">) 
     <article className="wrap section stack" style={{ maxWidth: 760 }}>
       <h1 style={{ fontSize: "clamp(36px, 5vw, 52px)" }}>{page.title}</h1>
       <p className="pill">Draft outline – to be written before launch</p>
-      {page.sections.map((s) => (
-        <section key={s} className="stack" style={{ gap: 8 }}>
-          <h2 style={{ fontSize: 24 }}>{s}</h2>
-          <p className="muted">[TO BE WRITTEN]</p>
-        </section>
-      ))}
+      {page.sections.map((raw) => {
+        const s = typeof raw === "string" ? { heading: raw } : raw;
+        return (
+          <section key={s.heading} className="stack" style={{ gap: 8 }}>
+            <h2 style={{ fontSize: 24 }}>{s.heading}</h2>
+            {s.text ? <p style={{ fontSize: 17 }}>{s.text}</p> : <p className="muted">[TO BE WRITTEN]</p>}
+          </section>
+        );
+      })}
     </article>
   );
 }

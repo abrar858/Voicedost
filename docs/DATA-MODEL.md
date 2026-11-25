@@ -13,6 +13,6 @@ Not created yet. This is the shape the code's placeholders expect.
 | `service_enquiries` | `email`, `service`, `message`, `status`, `created_at` | Done-for-you quote requests |
 | `abuse_reports` | `reporter_email`, `project_id`, `reason`, `status` | Misuse reports |
 
-**Minutes left** = sum of `minute_grants` not expired − sum of `usage_events` in the same period.
+**Minutes left** = plan minutes for this month (reset monthly, no rollover) + top-up minutes (never expire) − minutes used. Spend plan minutes first, then top-ups. Top-up grants have `expires_at` = null.
 
 Row-level security: users read and write only their own rows; admin reads all.

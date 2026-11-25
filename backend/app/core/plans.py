@@ -21,3 +21,4 @@ PLANS = {
 
 TOPUP_MINUTES = 30
 TOPUP_PRICE_GBP = 1.0
+TOPUP_EXPIRES = False  # top-up minutes never expire; used after plan minutes

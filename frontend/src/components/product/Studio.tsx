@@ -75,7 +75,7 @@ export function Studio() {
               onClick={() => setVoice(v.id)}
               title={v.use}
             >
-              {v.name}
+              {v.name} · {v.language.replace(" English", "")}
             </button>
           ))}
         </div>
