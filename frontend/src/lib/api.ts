@@ -1,4 +1,7 @@
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
+// Empty in production until the voice server is online (set NEXT_PUBLIC_API_URL in Vercel).
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "development" ? "http://localhost:8000" : "")).replace(/\/$/, "");
+
+export const OFFLINE_MESSAGE = "Voice generation goes live very soon. Listen to the voice samples in the meantime.";
 
 export type GenerateOptions = {
   text: string;
@@ -17,17 +20,23 @@ export type GenerateResult = {
 };
 
 export async function generateVoice(opts: GenerateOptions): Promise<GenerateResult> {
-  const res = await fetch(`${API_URL}/${opts.mode ?? "tts"}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      text: opts.text,
-      voice: opts.voice,
-      speed: opts.speed ?? 1,
-      pause_ms: opts.pauseMs ?? 350,
-      format: opts.format ?? "mp3",
-    }),
-  });
+  if (!API_URL) throw new Error(OFFLINE_MESSAGE);
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/${opts.mode ?? "tts"}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: opts.text,
+        voice: opts.voice,
+        speed: opts.speed ?? 1,
+        pause_ms: opts.pauseMs ?? 350,
+        format: opts.format ?? "mp3",
+      }),
+    });
+  } catch {
+    throw new Error("Could not reach the voice server. Please try again in a minute.");
+  }
   if (!res.ok) {
     let message = `Something went wrong (error ${res.status}).`;
     try {
