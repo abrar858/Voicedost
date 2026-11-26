@@ -41,7 +41,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     <form className="stack" onSubmit={onSubmit}>
       <h1 style={{ fontSize: 36 }}>{signup ? "Create a free account" : "Log in"}</h1>
       <p className="muted">
-        {signup ? "10 free minutes every month. No card, no password." : "We'll email you a link to sign in. No password needed."}
+        {signup ? "60 free minutes every month. No card, no password." : "We'll email you a link to sign in. No password needed."}
       </p>
       <label htmlFor="email" style={{ fontWeight: 600 }}>Email</label>
       <input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />

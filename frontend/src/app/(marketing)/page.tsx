@@ -16,7 +16,7 @@ export default function Home() {
             TikTok creators.
           </p>
           <div className="row">
-            <Link href="/studio" className="btn btn-orange">Try 10 minutes free</Link>
+            <Link href="/studio" className="btn btn-orange">Try 60 minutes free</Link>
             <Link href="/pricing" className="btn btn-outline">Plans from £3</Link>
           </div>
           <p className="muted">No card needed for the free plan.</p>

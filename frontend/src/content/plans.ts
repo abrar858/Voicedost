@@ -16,10 +16,10 @@ export type Plan = {
 
 /** Single source of truth for plan limits shown on the site. Keep in step with backend/app/core/plans.py */
 export const PLANS: Plan[] = [
-  { id: "free", name: "Free", price: "£0", per: "", minutesPerMonth: 10, minutes: "10 minutes a month", note: "All voices, MP3 downloads.", cta: "Start free" },
-  { id: "starter", name: "Starter", price: "£3", per: "/month", minutesPerMonth: 60, minutes: "60 minutes a month", note: "MP3 and WAV, saved projects.", cta: "Choose Starter" },
-  { id: "creator", name: "Creator", price: "£5", per: "/month", minutesPerMonth: 180, minutes: "180 minutes a month", note: "Best value for weekly uploads.", cta: "Choose Creator", featured: true },
-  { id: "topup", name: "Top-up", price: "£1", per: " one-off", minutesPerMonth: 30, minutes: "+30 minutes", note: "Never expires. Add to any plan when you run low.", cta: "Buy top-up", oneOff: true },
+  { id: "free", name: "Free", price: "£0", per: "", minutesPerMonth: 60, minutes: "60 minutes a month", note: "All voices, MP3 downloads.", cta: "Start free" },
+  { id: "starter", name: "Starter", price: "£3", per: "/month", minutesPerMonth: 300, minutes: "300 minutes a month", note: "MP3 and WAV, saved projects.", cta: "Choose Starter" },
+  { id: "creator", name: "Creator", price: "£5", per: "/month", minutesPerMonth: 1000, minutes: "1,000 minutes a month", note: "Best value for weekly uploads.", cta: "Choose Creator", featured: true },
+  { id: "topup", name: "Top-up", price: "£1", per: " one-off", minutesPerMonth: 120, minutes: "+120 minutes", note: "Never expires. Add to any plan when you run low.", cta: "Buy top-up", oneOff: true },
 ];
 
 export const FAQS = [

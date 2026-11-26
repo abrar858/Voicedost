@@ -122,7 +122,7 @@ export function Studio() {
         </div>
         {mustLogIn ? (
           <div className="stack" style={{ gap: 10 }}>
-            <p style={{ margin: 0 }}>Create a free account to generate voiceovers: 10 minutes every month, no card needed.</p>
+            <p style={{ margin: 0 }}>Create a free account to generate voiceovers: 60 minutes every month, no card needed.</p>
             <div className="row">
               <Link href="/signup" className="btn btn-orange">Start free</Link>
               <Link href="/login" className="btn btn-outline">Log in</Link>

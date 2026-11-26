@@ -10,7 +10,7 @@ export default function SignupPage() {
     return (
       <div className="stack">
         <h1 style={{ fontSize: 36 }}>Create a free account</h1>
-        <p>Sign-up opens soon with 10 free minutes a month. You can already try every voice in the studio.</p>
+        <p>Sign-up opens soon with 60 free minutes a month. You can already try every voice in the studio.</p>
         <Link href="/studio" className="btn btn-dark">Open the studio</Link>
       </div>
     );

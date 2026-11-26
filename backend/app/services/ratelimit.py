@@ -31,7 +31,7 @@ def check_try_limit(request: Request) -> None:
         q.popleft()
     if len(q) >= limit:
         raise HTTPException(429, "You've used the free try box a lot this hour. "
-                                 "Create a free account for 10 minutes a month.")
+                                 "Create a free account for 60 minutes a month.")
     q.append(now)
     if len(_hits) > 20000:  # keep memory bounded
         for ip in [ip for ip, d in _hits.items() if not d or d[-1] < now - WINDOW]:

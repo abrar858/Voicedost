@@ -48,7 +48,7 @@ export const USE_CASES: UseCase[] = [
     title: "Voiceovers for Faceless YouTube Channels | VoiceDost",
     h1: "Faceless YouTube channels",
     intro: "Publish more videos without recording your own voice. Keep the same narrator across every upload.",
-    points: ["One consistent narrator for your whole channel", "Redo a single line instead of re-recording", "180 minutes a month on Creator covers about twenty 8-minute videos"],
+    points: ["One consistent narrator for your whole channel", "Redo a single line instead of re-recording", "1,000 minutes a month on Creator covers over a hundred 8-minute videos"],
     voice: "george",
     sample: "Welcome back! In today's video we uncover the story behind one of history's strangest mysteries.",
   },

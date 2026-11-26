@@ -14,11 +14,11 @@ class Plan:
 
 
 PLANS = {
-    "free": Plan("free", 10, 0.0, allows_wav=False, commercial_use=True),
-    "starter": Plan("starter", 60, 3.0, allows_wav=True, commercial_use=True),
-    "creator": Plan("creator", 180, 5.0, allows_wav=True, commercial_use=True),
+    "free": Plan("free", 60, 0.0, allows_wav=False, commercial_use=True),
+    "starter": Plan("starter", 300, 3.0, allows_wav=True, commercial_use=True),
+    "creator": Plan("creator", 1000, 5.0, allows_wav=True, commercial_use=True),
 }
 
-TOPUP_MINUTES = 30
+TOPUP_MINUTES = 120
 TOPUP_PRICE_GBP = 1.0
 TOPUP_EXPIRES = False  # top-up minutes never expire; used after plan minutes
