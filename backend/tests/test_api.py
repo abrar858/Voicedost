@@ -85,6 +85,7 @@ def test_try_rate_limit(monkeypatch):
 def test_accounts_on_requires_login(monkeypatch):
     from app.core import config
     monkeypatch.setattr(config, "ACCOUNTS_ON", True)
+    monkeypatch.setattr(config, "OPEN_STUDIO", False)
     r = client.post("/tts", json={"text": "Hello", "voice": "george"})
     assert r.status_code == 401
     assert client.get("/me").status_code == 401
@@ -112,3 +113,16 @@ def test_accounts_counts_minutes(monkeypatch):
     assert client.get("/me", headers=h).json()["plan"] == "free"
     r = client.post("/tts", json={"text": "Hello there. " * 40, "voice": "george"}, headers=h)
     assert r.status_code == 402
+
+
+def test_open_studio_lets_visitors_in_with_limit(monkeypatch):
+    from app.core import config
+    from app.services import ratelimit
+    monkeypatch.setattr(config, "ACCOUNTS_ON", True)
+    monkeypatch.setattr(config, "OPEN_STUDIO", True)
+    monkeypatch.setattr(config, "OPEN_STUDIO_PER_HOUR", 1)
+    ratelimit._studio_hits.clear()
+    h = {"x-forwarded-for": "8.8.8.8"}
+    assert client.post("/tts", json={"text": "Hi", "voice": "nobody"}, headers=h).status_code == 404
+    assert client.post("/tts", json={"text": "Hi", "voice": "nobody"}, headers=h).status_code == 429
+    ratelimit._studio_hits.clear()

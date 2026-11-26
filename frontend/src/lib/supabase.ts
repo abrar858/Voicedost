@@ -1,5 +1,6 @@
 "use client";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { FEATURES } from "@/config/features";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -8,7 +9,7 @@ let client: SupabaseClient | null = null;
 
 /** Browser Supabase client, or null when accounts are not configured. */
 export function supabase(): SupabaseClient | null {
-  if (!url || !key) return null;
+  if (!FEATURES.accounts || !url || !key) return null;
   if (!client) {
     client = createClient(url, key, {
       // Implicit flow: the email link works even if it opens in a different browser (common on phones).

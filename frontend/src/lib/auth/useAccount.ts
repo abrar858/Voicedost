@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { FEATURES } from "@/config/features";
 import { fetchAccount } from "@/lib/api";
 import type { Account } from "@/lib/auth";
 
@@ -13,7 +14,7 @@ export type AccountState =
 /** Who is signed in, plus their plan and minutes from the voice server. */
 export function useAccount() {
   const [state, setState] = useState<AccountState>(() =>
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? { status: "loading" } : { status: "off" });
+    FEATURES.accounts ? { status: "loading" } : { status: "off" });
 
   const load = useCallback(async (token: string | null, email: string) => {
     if (!token) return setState({ status: "signed-out" });

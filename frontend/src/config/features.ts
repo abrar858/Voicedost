@@ -5,7 +5,11 @@
  */
 const on = (v: string | undefined) => v === "1" || v === "true";
 
+/** Soft launch: accounts are built but hidden until sign-in emails work for everyone. */
+const ACCOUNTS_PAUSED = true;
+
 const accounts =
+  !ACCOUNTS_PAUSED &&
   on(process.env.NEXT_PUBLIC_FEATURE_ACCOUNTS) &&
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

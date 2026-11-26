@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FEATURES } from "@/config/features";
 import { TryBox } from "@/components/marketing/TryBox";
 import { Faq, Pricing, SignupBand, Steps, VoiceCards } from "@/components/marketing/Sections";
 
@@ -16,10 +17,10 @@ export default function Home() {
             TikTok creators.
           </p>
           <div className="row">
-            <Link href="/studio" className="btn btn-orange">Try 60 minutes free</Link>
+            <Link href="/studio" className="btn btn-orange">{FEATURES.accounts ? "Try 60 minutes free" : "Open the studio free"}</Link>
             <Link href="/pricing" className="btn btn-outline">Plans from £3</Link>
           </div>
-          <p className="muted">No card needed for the free plan.</p>
+          <p className="muted">{FEATURES.accounts ? "No card needed for the free plan." : "Free to use while we launch. No sign-up needed."}</p>
         </div>
         <TryBox defaultText="Welcome back to the channel! Today I'll show you three easy ways to save money on your weekly shop." />
       </section>

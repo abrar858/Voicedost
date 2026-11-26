@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { AccountLink } from "@/components/account/AccountLink";
 import { FOOTER_GROUPS, MAIN_NAV, PRODUCT_NAV, SITE } from "@/config/site";
+import { FEATURES } from "@/config/features";
 
 /** Header for public marketing pages. */
 export function Header() {
@@ -25,7 +26,7 @@ export function ProductHeader() {
     <header className="header">
       <Logo />
       <nav className="nav" aria-label="Product">
-        {PRODUCT_NAV.map((l) => (
+        {PRODUCT_NAV.filter((l) => FEATURES.accounts || l.href === "/studio").map((l) => (
           <Link key={l.href} href={l.href}>{l.label}</Link>
         ))}
         <Link href="/pricing" className="btn btn-orange">Upgrade</Link>

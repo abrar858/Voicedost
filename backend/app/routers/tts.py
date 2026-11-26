@@ -74,9 +74,12 @@ async def _generate(req: TTSRequest, max_chars: int, user: CurrentUser | None) -
 
 
 @router.post("/tts")
-async def generate(req: TTSRequest, user: CurrentUser | None = Depends(get_current_user)):
-    if config.ACCOUNTS_ON and user is None:
-        raise HTTPException(401, "Please log in to use the studio. It's free to sign up.")
+async def generate(req: TTSRequest, request: Request, user: CurrentUser | None = Depends(get_current_user)):
+    if user is None:
+        if config.OPEN_STUDIO:
+            ratelimit.check_open_studio_limit(request)
+        elif config.ACCOUNTS_ON:
+            raise HTTPException(401, "Please log in to use the studio. It's free to sign up.")
     return await _generate(req, config.MAX_CHARS, user)
 
 
