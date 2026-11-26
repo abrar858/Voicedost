@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/ui/ComingSoon";
 import { TryBox } from "@/components/marketing/TryBox";
 import { SignupBand, VoiceCards } from "@/components/marketing/Sections";
+import { VOICES } from "@/content/voices";
 
 export const metadata: Metadata = {
   title: "AI Voices in English and Hindi",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 export default function VoicesPage() {
   return (
     <>
-      <PageIntro pill="5 voices · 3 accents" title="Meet the voices" lead="Play a sample, then try any voice with your own words below." />
+      <PageIntro pill={`${VOICES.length} voices · 3 accents`} title="Meet the voices" lead="Play a sample, then try any voice with your own words below." />
       <VoiceCards heading={false} />
       <section className="wrap section">
         <div style={{ maxWidth: 640 }}>

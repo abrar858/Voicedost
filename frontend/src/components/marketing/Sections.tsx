@@ -2,18 +2,21 @@ import Link from "next/link";
 import { FAQS, PLANS } from "@/content/plans";
 import { VOICES } from "@/content/voices";
 
-export function VoiceCards({ heading = true }: { heading?: boolean }) {
+const FEATURED = ["grace", "george", "emma", "ryan", "hindi-female", "hindi-male"];
+
+export function VoiceCards({ heading = true, featured = false }: { heading?: boolean; featured?: boolean }) {
+  const list = featured ? VOICES.filter((v) => FEATURED.includes(v.id)) : VOICES;
   return (
     <section id="voices" className="band section">
       <div className="wrap stack">
         {heading && (
           <>
             <h2>Voices that sound like people, not robots</h2>
-            <p className="lead">British and American English plus Hindi, all ready for narration. More voices are on the way.</p>
+            <p className="lead">{VOICES.length} voices in British and American English plus Hindi, all ready for narration.</p>
           </>
         )}
         <div className="grid">
-          {VOICES.map((v) => (
+          {list.map((v) => (
             <div className="card" key={v.id}>
               <span className="name">{v.name}</span>
               <span className="muted">{v.language} · {v.gender}</span>
@@ -22,6 +25,9 @@ export function VoiceCards({ heading = true }: { heading?: boolean }) {
             </div>
           ))}
         </div>
+        {featured && (
+          <Link href="/voices" className="btn btn-outline" style={{ alignSelf: "center" }}>Hear all {VOICES.length} voices</Link>
+        )}
       </div>
     </section>
   );

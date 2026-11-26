@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { SITE } from "@/config/site";
+import { FeedbackButton } from "@/components/ui/FeedbackButton";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -29,7 +31,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <FeedbackButton />
+        <Analytics />
+      </body>
     </html>
   );
 }

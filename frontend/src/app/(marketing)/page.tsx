@@ -24,7 +24,7 @@ export default function Home() {
         </div>
         <TryBox defaultText="Welcome back to the channel! Today I'll show you three easy ways to save money on your weekly shop." />
       </section>
-      <VoiceCards />
+      <VoiceCards featured />
       <Steps />
       <Pricing />
       <Faq />

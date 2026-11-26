@@ -116,3 +116,10 @@ button, input, textarea, select { font: inherit; }
 .meter { height: 12px; border-radius: 999px; background: #e7e2da; overflow: hidden; }
 .meter > span { display: block; height: 100%; background: var(--orange); border-radius: 999px; }
 .account-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+/* Feedback button */
+.feedback { position: fixed; right: 16px; bottom: 16px; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.feedback-panel { width: min(340px, calc(100vw - 32px)); background: #fff; box-shadow: 0 12px 40px rgba(20, 33, 61, 0.18); }
+.feedback-panel textarea { min-height: 96px; width: 100%; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 12px; resize: vertical; }
+.feedback-toggle { box-shadow: 0 6px 20px rgba(20, 33, 61, 0.25); }
+.feedback-panel input { width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 12px; }
