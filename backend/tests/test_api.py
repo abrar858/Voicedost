@@ -58,9 +58,9 @@ def test_generates_audio(voice, fmt):
 
 def test_plans_match_site():
     from app.core.plans import PLANS
-    assert PLANS["free"].minutes_per_month == 10
-    assert PLANS["starter"].minutes_per_month == 60
-    assert PLANS["creator"].minutes_per_month == 180
+    assert PLANS["free"].minutes_per_month == 60
+    assert PLANS["starter"].minutes_per_month == 300
+    assert PLANS["creator"].minutes_per_month == 1000
 
 
 def test_usage_is_unlimited_while_accounts_off():
