@@ -26,7 +26,7 @@ class TTSRequest(BaseModel):
     format: Literal["mp3", "wav"] = "mp3"
 
 
-async def _generate(req: TTSRequest, max_chars: int, user: CurrentUser | None) -> Response:
+async def _generate(req: TTSRequest, max_chars: int, user: CurrentUser | None, visitor_ip: str | None = None) -> Response:
     text = req.text.strip()
     if not text:
         raise HTTPException(400, "Script is empty.")
@@ -43,6 +43,8 @@ async def _generate(req: TTSRequest, max_chars: int, user: CurrentUser | None) -
         raise HTTPException(403, str(e))
     except supabase.SupabaseError as e:
         raise HTTPException(503, str(e))
+    if visitor_ip is not None:
+        ratelimit.check_open_studio_limit(visitor_ip, tts.estimate_seconds(text, req.speed))
 
     async with _jobs:
         try:
@@ -59,6 +61,8 @@ async def _generate(req: TTSRequest, max_chars: int, user: CurrentUser | None) -
         left = await usage.record_usage(user, minutes, voice.id, len(text))
     except supabase.SupabaseError:
         pass  # the user already has their audio; don't fail the request
+    if visitor_ip is not None:
+        left = ratelimit.record_open_studio(visitor_ip, audio.seconds)
     extra = {"X-Minutes-Left": f"{left:.2f}"} if left is not None else {}
     return Response(
         content=data,
@@ -77,8 +81,8 @@ async def _generate(req: TTSRequest, max_chars: int, user: CurrentUser | None) -
 async def generate(req: TTSRequest, request: Request, user: CurrentUser | None = Depends(get_current_user)):
     if user is None:
         if config.OPEN_STUDIO:
-            ratelimit.check_open_studio_limit(request)
-        elif config.ACCOUNTS_ON:
+            return await _generate(req, config.MAX_CHARS, None, visitor_ip=ratelimit.client_ip(request))
+        if config.ACCOUNTS_ON:
             raise HTTPException(401, "Please log in to use the studio. It's free to sign up.")
     return await _generate(req, config.MAX_CHARS, user)
 

@@ -115,14 +115,19 @@ def test_accounts_counts_minutes(monkeypatch):
     assert r.status_code == 402
 
 
-def test_open_studio_lets_visitors_in_with_limit(monkeypatch):
+def test_open_studio_daily_minutes(monkeypatch):
     from app.core import config
     from app.services import ratelimit
-    monkeypatch.setattr(config, "ACCOUNTS_ON", True)
     monkeypatch.setattr(config, "OPEN_STUDIO", True)
-    monkeypatch.setattr(config, "OPEN_STUDIO_PER_HOUR", 1)
-    ratelimit._studio_hits.clear()
-    h = {"x-forwarded-for": "8.8.8.8"}
-    assert client.post("/tts", json={"text": "Hi", "voice": "nobody"}, headers=h).status_code == 404
-    assert client.post("/tts", json={"text": "Hi", "voice": "nobody"}, headers=h).status_code == 429
-    ratelimit._studio_hits.clear()
+    monkeypatch.setattr(config, "OPEN_STUDIO_MINUTES_PER_DAY", 30)
+    ratelimit._daily.clear()
+    ip = "8.8.8.8"
+    assert ratelimit.record_open_studio(ip, 29 * 60) == 1.0
+    ratelimit.check_open_studio_limit(ip, 30)  # 30 s fits in the last minute
+    import fastapi
+    with pytest.raises(fastapi.HTTPException):
+        ratelimit.check_open_studio_limit(ip, 5 * 60)
+    ratelimit.record_open_studio(ip, 60)
+    r = client.post("/tts", json={"text": "Hello", "voice": "george"}, headers={"x-forwarded-for": ip})
+    assert r.status_code == 429
+    ratelimit._daily.clear()

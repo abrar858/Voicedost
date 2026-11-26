@@ -40,5 +40,5 @@ TRY_PER_HOUR = _int("VOICEDOST_TRY_PER_HOUR", 10)
 # Soft launch: let visitors use the full studio without an account.
 # Signed-in users are still counted. Set VOICEDOST_OPEN_STUDIO=0 to require login.
 OPEN_STUDIO = os.environ.get("VOICEDOST_OPEN_STUDIO", "1") == "1"
-# Studio generations allowed per visitor (IP) per hour while the studio is open.
-OPEN_STUDIO_PER_HOUR = _int("VOICEDOST_OPEN_STUDIO_PER_HOUR", 20)
+# Minutes of audio each visitor (IP) may make per day (UTC) while the studio is open.
+OPEN_STUDIO_MINUTES_PER_DAY = _int("VOICEDOST_OPEN_STUDIO_MINUTES_PER_DAY", 30)

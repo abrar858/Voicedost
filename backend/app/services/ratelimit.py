@@ -10,7 +10,6 @@ from fastapi import HTTPException, Request
 from ..core import config
 
 _hits: dict[str, deque[float]] = defaultdict(deque)
-_studio_hits: dict[str, deque[float]] = defaultdict(deque)
 WINDOW = 3600.0
 
 
@@ -27,9 +26,42 @@ def check_try_limit(request: Request) -> None:
            "You've used the free try box a lot this hour. Please try again a bit later.")
 
 
-def check_open_studio_limit(request: Request) -> None:
-    _check(request, _studio_hits, config.OPEN_STUDIO_PER_HOUR,
-           "You've made a lot of voiceovers this hour. Please try again in a little while.")
+# Open studio: minutes of audio per visitor per day. ip -> (utc day, seconds used)
+_daily: dict[str, tuple[str, float]] = {}
+
+
+def _today() -> str:
+    return time.strftime("%Y-%m-%d", time.gmtime())
+
+
+def open_studio_seconds_left(ip: str) -> float:
+    day, used = _daily.get(ip, ("", 0.0))
+    if day != _today():
+        used = 0.0
+    return max(config.OPEN_STUDIO_MINUTES_PER_DAY * 60 - used, 0.0)
+
+
+def check_open_studio_limit(ip: str, estimated_seconds: float) -> None:
+    left = open_studio_seconds_left(ip)
+    if left <= 0:
+        raise HTTPException(429, f"You've used today's {config.OPEN_STUDIO_MINUTES_PER_DAY} free minutes. "
+                                 "Come back tomorrow for more.")
+    if estimated_seconds > left + 5:
+        raise HTTPException(429, f"You have about {left / 60:.1f} free minutes left today and this script "
+                                 f"needs about {estimated_seconds / 60:.1f}. Please shorten it.")
+
+
+def record_open_studio(ip: str, seconds: float) -> float:
+    """Adds seconds to today's total; returns minutes left today."""
+    today = _today()
+    day, used = _daily.get(ip, (today, 0.0))
+    if day != today:
+        used = 0.0
+    _daily[ip] = (today, used + seconds)
+    if len(_daily) > 50000:  # drop earlier days to keep memory bounded
+        for k in [k for k, (d, _) in _daily.items() if d != today]:
+            del _daily[k]
+    return open_studio_seconds_left(ip) / 60
 
 
 def _check(request: Request, hits: dict[str, deque[float]], limit: int, message: str) -> None:

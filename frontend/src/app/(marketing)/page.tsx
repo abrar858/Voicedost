@@ -20,7 +20,7 @@ export default function Home() {
             <Link href="/studio" className="btn btn-orange">{FEATURES.accounts ? "Try 60 minutes free" : "Open the studio free"}</Link>
             <Link href="/pricing" className="btn btn-outline">Plans from £3</Link>
           </div>
-          <p className="muted">{FEATURES.accounts ? "No card needed for the free plan." : "Free to use while we launch. No sign-up needed."}</p>
+          <p className="muted">{FEATURES.accounts ? "No card needed for the free plan." : "30 free minutes every day while we launch. No sign-up needed."}</p>
         </div>
         <TryBox defaultText="Welcome back to the channel! Today I'll show you three easy ways to save money on your weekly shop." />
       </section>

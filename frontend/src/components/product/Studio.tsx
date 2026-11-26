@@ -8,6 +8,8 @@ import { useAccount } from "@/lib/auth/useAccount";
 import { formatMinutes } from "@/components/account/MinutesMeter";
 
 const MAX_CHARS = 5000;
+/** Matches VOICEDOST_OPEN_STUDIO_MINUTES_PER_DAY on the voice server. */
+const FREE_DAILY_MINUTES = 30;
 
 function splitLines(script: string): string[] {
   return script
@@ -34,6 +36,7 @@ export function Studio() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<GenerateResult | null>(null);
+  const [freeLeft, setFreeLeft] = useState<number | null>(null);
 
   useEffect(() => () => { if (result) URL.revokeObjectURL(result.url); }, [result]);
 
@@ -46,7 +49,8 @@ export function Studio() {
     try {
       const r = await generateVoice({ text, voice, speed, pauseMs: pause, format, token: signedIn?.token });
       setResult(r);
-      if (r.minutesLeft !== null) refresh();
+      if (signedIn && r.minutesLeft !== null) refresh();
+      if (!signedIn && r.minutesLeft !== null) setFreeLeft(r.minutesLeft);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not generate the voice.");
     } finally {
@@ -78,6 +82,12 @@ export function Studio() {
           <div className="row" style={{ justifyContent: "space-between" }}>
             <strong>{formatMinutes(signedIn.account.minutes_left)} left</strong>
             <Link href="/pricing" className="muted">Get more</Link>
+          </div>
+        )}
+        {state.status === "off" && (
+          <div className="row" style={{ justifyContent: "space-between" }}>
+            <strong>Free: {FREE_DAILY_MINUTES} minutes a day</strong>
+            {freeLeft !== null && <span className="muted">{formatMinutes(freeLeft)} left today</span>}
           </div>
         )}
         {signedIn && !signedIn.account && signedIn.error && <span className="error-light">{signedIn.error}</span>}
