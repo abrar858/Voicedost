@@ -89,3 +89,87 @@ export async function fetchAccount(token: string): Promise<import("@/lib/auth").
   }
   return res.json();
 }
+
+// ------------------------------------------------------------ studio jobs
+
+export type JobStatus = {
+  id: string;
+  status: "queued" | "running" | "done" | "error";
+  done: number;
+  total: number;
+  error: string | null;
+  seconds: number;
+  minutes: number;
+  minutes_left: number | null;
+  format: "mp3" | "wav";
+};
+
+export type JobResult = { audioUrl: string; srtUrl: string; job: JobStatus };
+
+async function errorMessage(res: Response): Promise<string> {
+  try {
+    const body = await res.json();
+    if (typeof body.detail === "string") return body.detail;
+  } catch {
+    /* keep default */
+  }
+  return `Something went wrong (error ${res.status}).`;
+}
+
+/**
+ * Makes a studio voiceover as a background job, reporting progress, then
+ * downloads the audio and subtitles. Handles scripts up to 10,000 characters.
+ */
+export async function generateWithProgress(
+  opts: GenerateOptions,
+  onProgress: (job: JobStatus) => void,
+): Promise<JobResult> {
+  if (!API_URL) throw new Error(OFFLINE_MESSAGE);
+  const auth: Record<string, string> = opts.token ? { Authorization: `Bearer ${opts.token}` } : {};
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/jobs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...auth },
+      body: JSON.stringify({
+        text: opts.text,
+        voice: opts.voice,
+        speed: opts.speed ?? 1,
+        pause_ms: opts.pauseMs ?? 350,
+        format: opts.format ?? "mp3",
+      }),
+    });
+  } catch {
+    throw new Error("Could not reach the voice server. Please try again in a minute.");
+  }
+  if (!res.ok) throw new Error(await errorMessage(res));
+  let job: JobStatus = await res.json();
+  onProgress(job);
+
+  let failures = 0;
+  while (job.status === "queued" || job.status === "running") {
+    await new Promise((r) => setTimeout(r, 1000));
+    try {
+      const r = await fetch(`${API_URL}/jobs/${job.id}`);
+      if (!r.ok) throw new Error(await errorMessage(r));
+      job = await r.json();
+      failures = 0;
+      onProgress(job);
+    } catch (e) {
+      if (++failures >= 10) throw e instanceof Error ? e : new Error("Lost contact with the voice server.");
+    }
+  }
+  if (job.status === "error") throw new Error(job.error || "Could not make the voice.");
+
+  const [audio, srt] = await Promise.all([
+    fetch(`${API_URL}/jobs/${job.id}/audio`),
+    fetch(`${API_URL}/jobs/${job.id}/srt`),
+  ]);
+  if (!audio.ok) throw new Error(await errorMessage(audio));
+  const srtText = srt.ok ? await srt.text() : "";
+  return {
+    audioUrl: URL.createObjectURL(await audio.blob()),
+    srtUrl: URL.createObjectURL(new Blob([srtText], { type: "application/x-subrip" })),
+    job,
+  };
+}

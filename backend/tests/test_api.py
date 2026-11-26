@@ -131,3 +131,37 @@ def test_open_studio_daily_minutes(monkeypatch):
     r = client.post("/tts", json={"text": "Hello", "voice": "george"}, headers={"x-forwarded-for": ip})
     assert r.status_code == 429
     ratelimit._daily.clear()
+
+
+@pytest.mark.skipif(not models_ready, reason="voice model not downloaded")
+def test_job_flow_with_subtitles():
+    import time
+    from app.services import ratelimit
+    ratelimit._daily.clear()
+    with TestClient(app) as c:  # keeps the event loop alive between requests
+        _job_flow(c)
+
+
+def _job_flow(client):
+    import time
+    r = client.post("/jobs", json={"text": "First line.\nSecond line here.", "voice": "emma"})
+    assert r.status_code == 200, r.text
+    job = r.json()
+    assert job["total"] == 2
+    for _ in range(120):
+        s = client.get(f"/jobs/{job['id']}").json()
+        if s["status"] in ("done", "error"):
+            break
+        time.sleep(0.25)
+    assert s["status"] == "done", s
+    assert s["done"] == 2 and s["seconds"] > 0
+    audio = client.get(f"/jobs/{job['id']}/audio")
+    assert audio.status_code == 200 and len(audio.content) > 1000
+    srt = client.get(f"/jobs/{job['id']}/srt").text
+    assert "00:00:00,000 -->" in srt and "Second line here." in srt
+    assert client.get("/jobs/nope").status_code == 404
+
+
+def test_job_rejects_too_long():
+    r = client.post("/jobs", json={"text": "a" * 10001, "voice": "emma"})
+    assert r.status_code == 413

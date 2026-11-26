@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { estimateSeconds, generateVoice, type GenerateResult } from "@/lib/api";
+import { estimateSeconds, generateWithProgress, type JobResult, type JobStatus } from "@/lib/api";
 import { VOICES } from "@/content/voices";
 import { useAccount } from "@/lib/auth/useAccount";
 import { formatMinutes } from "@/components/account/MinutesMeter";
 
-const MAX_CHARS = 5000;
+const MAX_CHARS = 10000;
 /** Matches VOICEDOST_OPEN_STUDIO_MINUTES_PER_DAY on the voice server. */
 const FREE_DAILY_MINUTES = 30;
 
@@ -35,10 +35,16 @@ export function Studio() {
   const format = freePlan ? "mp3" : chosenFormat;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<GenerateResult | null>(null);
+  const [result, setResult] = useState<(JobResult & { fmt: string; voice: string }) | null>(null);
+  const [progress, setProgress] = useState<JobStatus | null>(null);
   const [freeLeft, setFreeLeft] = useState<number | null>(null);
 
-  useEffect(() => () => { if (result) URL.revokeObjectURL(result.url); }, [result]);
+  useEffect(() => () => {
+    if (result) {
+      URL.revokeObjectURL(result.audioUrl);
+      URL.revokeObjectURL(result.srtUrl);
+    }
+  }, [result]);
 
   const lines = useMemo(() => splitLines(text), [text]);
   const over = text.length > MAX_CHARS;
@@ -46,15 +52,21 @@ export function Studio() {
   async function onGenerate() {
     setBusy(true);
     setError("");
+    setProgress(null);
     try {
-      const r = await generateVoice({ text, voice, speed, pauseMs: pause, format, token: signedIn?.token });
-      setResult(r);
-      if (signedIn && r.minutesLeft !== null) refresh();
-      if (!signedIn && r.minutesLeft !== null) setFreeLeft(r.minutesLeft);
+      const r = await generateWithProgress(
+        { text, voice, speed, pauseMs: pause, format, token: signedIn?.token },
+        setProgress,
+      );
+      setResult({ ...r, fmt: format, voice });
+      const left = r.job.minutes_left;
+      if (signedIn && left !== null) refresh();
+      if (!signedIn && left !== null) setFreeLeft(left);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not generate the voice.");
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   }
 
@@ -65,7 +77,7 @@ export function Studio() {
         <textarea id="script" value={text} onChange={(e) => setText(e.target.value)} />
         <span className={over ? "error-light" : "muted"}>
           {text.length.toLocaleString()} / {MAX_CHARS.toLocaleString()} characters · about{" "}
-          {estimateSeconds(text.length, speed)} seconds of audio · {lines.length} lines
+          {formatMinutes(estimateSeconds(text.length, speed) / 60)} of audio · {lines.length} lines
         </span>
         {lines.length > 0 && (
           <details>
@@ -148,15 +160,28 @@ export function Studio() {
             {busy ? "Generating…" : "Generate voice"}
           </button>
         )}
+        {busy && progress && (
+          <div className="stack" style={{ gap: 6 }} aria-live="polite">
+            <div className="meter"><span style={{ width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%` }} /></div>
+            <span className="muted">
+              {progress.status === "queued"
+                ? "Waiting for a free slot… you're in the queue."
+                : `Making line ${Math.min(progress.done + 1, progress.total)} of ${progress.total}…`}
+            </span>
+          </div>
+        )}
         <span role="status" className={error ? "error-light" : "muted"}>{error}</span>
         {result && (
           <div className="stack" style={{ gap: 10 }}>
-            <audio controls src={result.url} style={{ width: "100%" }} />
-            <a className="btn btn-orange" href={result.url} download={`voicedost-${voice}.${format}`}>
-              Download {format.toUpperCase()}
+            <audio controls src={result.audioUrl} style={{ width: "100%" }} />
+            <a className="btn btn-orange" href={result.audioUrl} download={`voicedost-${result.voice}.${result.fmt}`}>
+              Download {result.fmt.toUpperCase()}
+            </a>
+            <a className="btn btn-outline" href={result.srtUrl} download={`voicedost-${result.voice}.srt`}>
+              Download subtitles (SRT)
             </a>
             <span className="muted">
-              {result.seconds.toFixed(1)} seconds · {result.lines} lines · {result.minutes.toFixed(2)} minutes used
+              {formatMinutes(result.job.seconds / 60)} of audio · {result.job.total} lines
             </span>
           </div>
         )}

@@ -15,8 +15,12 @@ MODELS_DIR = Path(os.environ.get("VOICEDOST_MODELS_DIR", Path(__file__).resolve(
 KOKORO_MODEL = MODELS_DIR / "kokoro-v1.0.onnx"
 KOKORO_VOICES = MODELS_DIR / "voices-v1.0.bin"
 
-# Longest script accepted in one request (characters).
-MAX_CHARS = _int("VOICEDOST_MAX_CHARS", 5000)
+# Longest studio script (characters), made as a background job (~10 minutes of audio).
+MAX_CHARS = _int("VOICEDOST_MAX_CHARS", 10000)
+# Longest script for the single-request /tts endpoint.
+SHORT_MAX_CHARS = _int("VOICEDOST_SHORT_MAX_CHARS", 5000)
+# Jobs waiting or running at once before new ones are turned away.
+MAX_QUEUED_JOBS = _int("VOICEDOST_MAX_QUEUED_JOBS", 20)
 # Anonymous "try it" box limit on the landing page.
 TRY_MAX_CHARS = _int("VOICEDOST_TRY_MAX_CHARS", 200)
 # How many generations may run at once on this server.

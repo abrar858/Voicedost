@@ -44,7 +44,7 @@ export default async function ToolPage({ params }: PageProps<"/tools/[slug]">) {
           <ul style={{ margin: 0, paddingLeft: 22, display: "grid", gap: 8, fontSize: 18 }}>
             {page.tips.map((t) => <li key={t}>{t}</li>)}
           </ul>
-          <p className="muted">The free box takes up to 200 characters. The studio handles full scripts up to 5,000 characters.</p>
+          <p className="muted">The free box takes up to 200 characters. The studio handles full scripts up to 10,000 characters (about 9 minutes of audio) and gives you subtitles too.</p>
         </div>
       </section>
     </>

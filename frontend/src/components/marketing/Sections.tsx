@@ -37,7 +37,7 @@ export function Steps() {
   const steps = [
     ["Paste your script", "Long scripts are split into lines you can check one by one."],
     ["Pick a voice and speed", "Choose English or Hindi, then set the speed and the pause between lines."],
-    ["Download and post", "Get an MP3 or WAV ready for your video editor."],
+    ["Download and post", "Get an MP3 or WAV plus a matching subtitles file (SRT) for your video editor."],
   ];
   return (
     <section id="how" className="section">
