@@ -44,7 +44,15 @@ def get_engine():
     return _engine
 
 
-_SENTENCE_END = re.compile(r"(?<=[.!?।])\s+")
+_SENTENCE_END = re.compile(r"(?<=[۔؟])\s*(?=\S)|(?<=[.!?।])\s+")
+_URDU = re.compile(r"[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]")
+
+
+def lang_for(line: str, voice: Voice) -> str:
+    """Urdu script is read with Urdu pronunciation rules (sounds like Hindi)."""
+    if len(_URDU.findall(line)) >= max(2, len(line.replace(" ", "")) // 3):
+        return "ur"
+    return voice.kokoro_lang
 
 
 def split_lines(script: str) -> list[str]:
@@ -95,7 +103,7 @@ def synthesise(script: str, voice: Voice, speed: float = 1.0, pause_ms: int = 35
     cues: list[Cue] = []
     t = 0.0
     for i, line in enumerate(lines):
-        samples, sr = engine.create(line, voice=voice.kokoro_voice, speed=speed, lang=voice.kokoro_lang)
+        samples, sr = engine.create(line, voice=voice.kokoro_voice, speed=speed, lang=lang_for(line, voice))
         if sr != SAMPLE_RATE:
             raise RuntimeError(f"Unexpected sample rate {sr}")
         arr = np.asarray(samples, dtype=np.float32)

@@ -11,8 +11,8 @@ export const VOICES: Voice[] = [
   { id: "jake", name: "Jake", language: "American English", gender: "male", use: "Upbeat and casual. Great for gaming, reviews and vlogs." },
   { id: "isabella", name: "Isabella", language: "British English", gender: "female", use: "Polished British voice for courses and corporate videos." },
   { id: "oliver", name: "Oliver", language: "British English", gender: "male", use: "Storyteller voice. Great for kids' stories and audiobooks." },
-  { id: "hindi-female", name: "Priya", language: "Hindi", gender: "female", use: "Natural Hindi narration for Reels and Shorts." },
-  { id: "hindi-male", name: "Arjun", language: "Hindi", gender: "male", use: "Clear Hindi narration for stories and news." },
+  { id: "hindi-female", name: "Priya", language: "Hindi", gender: "female", use: "Natural Hindi narration for Reels and Shorts. Also reads Urdu script." },
+  { id: "hindi-male", name: "Arjun", language: "Hindi", gender: "male", use: "Clear Hindi narration for stories and news. Also reads Urdu script." },
   { id: "anaya", name: "Anaya", language: "Hindi", gender: "female", use: "Soft Hindi voice for motivation, poetry and devotional videos." },
   { id: "rohan", name: "Rohan", language: "Hindi", gender: "male", use: "Friendly Hindi voice for explainers and tutorials." },
 ];

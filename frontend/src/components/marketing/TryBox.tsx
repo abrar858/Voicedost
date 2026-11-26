@@ -33,7 +33,7 @@ export function TryBox({ defaultText, defaultVoice = "george" }: { defaultText: 
   return (
     <div className="trybox">
       <label htmlFor="try-script">Try it: type up to {TRY_LIMIT} characters</label>
-      <textarea
+      <textarea dir="auto"
         id="try-script"
         rows={4}
         maxLength={TRY_LIMIT}

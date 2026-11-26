@@ -12,7 +12,7 @@ export function VoiceCards({ heading = true, featured = false }: { heading?: boo
         {heading && (
           <>
             <h2>Voices that sound like people, not robots</h2>
-            <p className="lead">{VOICES.length} voices in British and American English plus Hindi, all ready for narration.</p>
+            <p className="lead">{VOICES.length} voices in British and American English plus Hindi. Type in English, Hindi or Urdu script.</p>
           </>
         )}
         <div className="grid">

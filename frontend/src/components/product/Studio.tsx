@@ -15,7 +15,7 @@ function splitLines(script: string): string[] {
   return script
     .replace(/\r\n/g, "\n")
     .split("\n")
-    .flatMap((block) => block.trim().split(/(?<=[.!?।])\s+/))
+    .flatMap((block) => block.trim().split(/(?<=[۔؟])\s*(?=\S)|(?<=[.!?।])\s+/))
     .map((s) => s.trim())
     .filter(Boolean);
 }
@@ -74,7 +74,7 @@ export function Studio() {
     <div className="studio">
       <section className="panel" aria-labelledby="script-label">
         <label id="script-label" htmlFor="script" className="field">Script</label>
-        <textarea id="script" value={text} onChange={(e) => setText(e.target.value)} />
+        <textarea id="script" dir="auto" value={text} onChange={(e) => setText(e.target.value)} />
         <span className={over ? "error-light" : "muted"}>
           {text.length.toLocaleString()} / {MAX_CHARS.toLocaleString()} characters · about{" "}
           {formatMinutes(estimateSeconds(text.length, speed) / 60)} of audio · {lines.length} lines

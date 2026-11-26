@@ -165,3 +165,12 @@ def _job_flow(client):
 def test_job_rejects_too_long():
     r = client.post("/jobs", json={"text": "a" * 10001, "voice": "emma"})
     assert r.status_code == 413
+
+
+def test_urdu_script_uses_urdu_pronunciation():
+    from app.core.voices import VOICES_BY_ID
+    v = VOICES_BY_ID["hindi-female"]
+    assert tts.lang_for("آج ہم ایک نئی کہانی سنیں گے۔", v) == "ur"
+    assert tts.lang_for("नमस्ते दोस्तो", v) == "hi"
+    assert tts.lang_for("Hello YouTube", VOICES_BY_ID["george"]) == "en-gb"
+    assert tts.split_lines("پہلا جملہ۔دوسرا جملہ؟ Version 2.5 is out.") == ["پہلا جملہ۔", "دوسرا جملہ؟", "Version 2.5 is out."]
