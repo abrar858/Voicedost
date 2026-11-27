@@ -174,3 +174,33 @@ def test_urdu_script_uses_urdu_pronunciation():
     assert tts.lang_for("नमस्ते दोस्तो", v) == "hi"
     assert tts.lang_for("Hello YouTube", VOICES_BY_ID["george"]) == "en-gb"
     assert tts.split_lines("پہلا جملہ۔دوسرا جملہ؟ Version 2.5 is out.") == ["پہلا جملہ۔", "دوسرا جملہ؟", "Version 2.5 is out."]
+
+
+@pytest.mark.skipif(not models_ready, reason="voice model not downloaded")
+def test_music_share_and_stats(tmp_path, monkeypatch):
+    import time
+    from app.core import config
+    from app.services import ratelimit
+    monkeypatch.setattr(config, "DATA_DIR", tmp_path)
+    ratelimit._daily.clear()
+    assert len(client.get("/music").json()) == 6
+    assert client.post("/jobs", json={"text": "Hi", "voice": "emma", "music": "nope"}).status_code == 404
+    with TestClient(app) as c:
+        job = c.post("/jobs", json={"text": "Music test line.", "voice": "grace", "music": "calm"}).json()
+        for _ in range(120):
+            s = c.get(f"/jobs/{job['id']}").json()
+            if s["status"] in ("done", "error"):
+                break
+            time.sleep(0.25)
+        assert s["status"] == "done", s
+        assert s["seconds"] > 2.5  # lead-in + tail added
+        srt = c.get(f"/jobs/{job['id']}/srt").text
+        assert "00:00:00,800 -->" in srt  # cues shifted by the music lead-in
+        share = c.post(f"/jobs/{job['id']}/share").json()
+        assert c.post(f"/jobs/{job['id']}/share").json()["id"] == share["id"]
+        meta = c.get(f"/shares/{share['id']}").json()
+        assert meta["voice_name"] == "Grace" and meta["excerpt"] == "Music test line."
+        audio = c.get(f"/shares/{share['id']}/audio")
+        assert audio.status_code == 200 and len(audio.content) > 1000
+        assert c.get("/shares/../../etc").status_code == 404
+        assert c.get("/stats").json()["voiceovers"] >= 1

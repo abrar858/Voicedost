@@ -186,3 +186,74 @@ def to_mp3(audio: Audio, bitrate: str = "128k") -> bytes:
     if proc.returncode != 0:
         raise RuntimeError("MP3 encoding failed: " + proc.stderr.decode(errors="ignore")[:300])
     return proc.stdout
+
+
+# ---------------------------------------------------------- background music
+
+_music_cache: dict[str, np.ndarray] = {}
+MUSIC_LEAD_IN = 0.8   # seconds of music before the voice starts
+MUSIC_TAIL = 2.0      # seconds of music after the voice ends (fades out)
+
+
+def _load_music(track_id: str) -> np.ndarray:
+    if track_id not in _music_cache:
+        import soundfile as sf
+
+        from ..core.music import MUSIC_DIR
+        data, sr = sf.read(MUSIC_DIR / f"{track_id}.ogg", dtype="float32")
+        if data.ndim > 1:
+            data = data.mean(axis=1)
+        if sr != SAMPLE_RATE:
+            raise RuntimeError(f"Music must be {SAMPLE_RATE} Hz")
+        _music_cache[track_id] = data
+    return _music_cache[track_id]
+
+
+def _loop(music: np.ndarray, n: int, fade: int = int(0.05 * SAMPLE_RATE)) -> np.ndarray:
+    """Repeats a track to n samples with short crossfades at each join."""
+    out = np.zeros(n, dtype=np.float32)
+    ramp = np.linspace(0, 1, fade, dtype=np.float32)
+    pos, step = 0, len(music) - fade
+    while pos < n:
+        seg = music[: min(len(music), n - pos)].copy()
+        if pos > 0:
+            k = min(fade, len(seg))
+            seg[:k] *= ramp[:k]
+            out[pos:pos + k] *= 1 - ramp[:k]
+        out[pos:pos + len(seg)] += seg
+        pos += step
+    return out
+
+
+def _smooth(x: np.ndarray, attack: float, release: float) -> np.ndarray:
+    """Envelope follower (fast up, slow down), done in blocks for speed."""
+    block = 240  # 10 ms
+    nb = int(np.ceil(len(x) / block))
+    peaks = np.pad(np.abs(x), (0, nb * block - len(x))).reshape(nb, block).max(axis=1)
+    a = np.exp(-block / (attack * SAMPLE_RATE))
+    r = np.exp(-block / (release * SAMPLE_RATE))
+    env, level = np.empty(nb, dtype=np.float32), 0.0
+    for i, p in enumerate(peaks):
+        level = a * level + (1 - a) * p if p > level else r * level + (1 - r) * p
+        env[i] = level
+    return np.repeat(env, block)[: len(x)]
+
+
+def add_music(audio: Audio, track_id: str, volume: float = 0.5) -> Audio:
+    """Mixes a background track under the voice, dipping it while someone speaks."""
+    music = _load_music(track_id)
+    lead, tail = int(MUSIC_LEAD_IN * SAMPLE_RATE), int(MUSIC_TAIL * SAMPLE_RATE)
+    voice = np.concatenate([np.zeros(lead, np.float32), audio.samples.astype(np.float32), np.zeros(tail, np.float32)])
+    bed = _loop(music, len(voice))
+    base = 10 ** ((-28 + 18 * float(np.clip(volume, 0, 1))) / 20)  # -28 dB .. -10 dB
+    speaking = np.clip(_smooth(voice, 0.05, 0.45) / 0.08, 0, 1)
+    gain = base * (1 - 0.6 * speaking)
+    fade = np.ones(len(voice), np.float32)
+    fade[: lead // 2] = np.linspace(0, 1, lead // 2)
+    fade[-tail:] = np.linspace(1, 0, tail)
+    mixed = voice + bed / (np.max(np.abs(bed)) + 1e-9) * gain * fade
+    peak = np.max(np.abs(mixed))
+    if peak > 0.98:
+        mixed *= 0.98 / peak
+    cues = [Cue(c.start + MUSIC_LEAD_IN, c.end + MUSIC_LEAD_IN, c.text) for c in (audio.cues or [])]
+    return Audio(mixed.astype(np.float32), audio.sample_rate, cues)

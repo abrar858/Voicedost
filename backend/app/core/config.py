@@ -46,3 +46,8 @@ TRY_PER_HOUR = _int("VOICEDOST_TRY_PER_HOUR", 10)
 OPEN_STUDIO = os.environ.get("VOICEDOST_OPEN_STUDIO", "1") == "1"
 # Minutes of audio each visitor (IP) may make per day (UTC) while the studio is open.
 OPEN_STUDIO_MINUTES_PER_DAY = _int("VOICEDOST_OPEN_STUDIO_MINUTES_PER_DAY", 30)
+
+# Where shared voiceovers and site stats are kept on the server.
+DATA_DIR = Path(os.environ.get("VOICEDOST_DATA_DIR", Path(__file__).resolve().parents[2] / "data"))
+# Shared voiceovers are kept this many days.
+SHARE_DAYS = _int("VOICEDOST_SHARE_DAYS", 90)

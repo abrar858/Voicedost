@@ -30,6 +30,10 @@ class Job:
     minutes_left: float | None = None
     data: bytes = b""
     srt: str = ""
+    voice_name: str = ""
+    excerpt: str = ""
+    music: str | None = None
+    share_id: str = ""
     created: float = field(default_factory=time.monotonic)
 
     def fail(self, message: str) -> None:

@@ -4,6 +4,9 @@
 - GET  /jobs/{id}       progress: queued / running (line x of y) / done / error
 - GET  /jobs/{id}/audio the finished MP3 or WAV
 - GET  /jobs/{id}/srt   subtitles for the finished voiceover
+- POST /jobs/{id}/share make a public link for a finished voiceover
+- GET  /shares/{id}     shared voiceover details; /shares/{id}/audio plays it
+- GET  /stats           site-wide counter; GET /music lists background tracks
 - POST /tts             short studio voiceover in one request (kept for simple use)
 - POST /try             landing-page try box (200 characters, no account)
 """
@@ -14,12 +17,13 @@ import asyncio
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import PlainTextResponse, Response
+from fastapi.responses import FileResponse, PlainTextResponse, Response
 from pydantic import BaseModel, Field
 
 from ..core import config
+from ..core.music import TRACKS, TRACKS_BY_ID
 from ..core.voices import VOICES_BY_ID, Voice
-from ..services import jobs, ratelimit, supabase, tts, usage
+from ..services import jobs, ratelimit, store, supabase, tts, usage
 from ..services.auth import CurrentUser, get_current_user
 
 router = APIRouter(tags=["tts"])
@@ -32,6 +36,8 @@ class TTSRequest(BaseModel):
     speed: float = Field(1.0, ge=0.5, le=2.0)
     pause_ms: int = Field(350, ge=0, le=3000)
     format: Literal["mp3", "wav"] = "mp3"
+    music: str | None = None  # background track id, or None for voice only
+    music_volume: float = Field(0.5, ge=0, le=1)
 
 
 async def _check(req: TTSRequest, max_chars: int, user: CurrentUser | None,
@@ -45,6 +51,8 @@ async def _check(req: TTSRequest, max_chars: int, user: CurrentUser | None,
     voice = VOICES_BY_ID.get(req.voice)
     if voice is None:
         raise HTTPException(404, f"Unknown voice '{req.voice}'.")
+    if req.music and req.music not in TRACKS_BY_ID:
+        raise HTTPException(404, f"Unknown music track '{req.music}'.")
     estimate = tts.estimate_seconds(text, req.speed)
     try:
         await usage.check_minutes(user, estimate / 60, req.format)
@@ -62,6 +70,10 @@ async def _check(req: TTSRequest, max_chars: int, user: CurrentUser | None,
 async def _settle(user: CurrentUser | None, visitor_ip: str | None, audio: tts.Audio,
                   voice: Voice, chars: int) -> float | None:
     """Counts the minutes used. Returns minutes left, if known."""
+    try:
+        store.count_voiceover(audio.seconds)
+    except OSError:
+        pass
     if visitor_ip is not None:
         return ratelimit.record_open_studio(visitor_ip, audio.seconds)
     try:
@@ -85,6 +97,13 @@ def _encode(audio: tts.Audio, fmt: str) -> bytes:
     return tts.to_mp3(audio) if fmt == "mp3" else tts.to_wav(audio)
 
 
+def _render(text: str, voice: Voice, req: TTSRequest, on_progress=None) -> tts.Audio:
+    audio = tts.synthesise(text, voice, req.speed, req.pause_ms, on_progress)
+    if req.music:
+        audio = tts.add_music(audio, req.music, req.music_volume)
+    return audio
+
+
 # ---------------------------------------------------------------- jobs (studio)
 
 @router.post("/jobs")
@@ -94,14 +113,14 @@ async def start_job(req: TTSRequest, request: Request, user: CurrentUser | None 
     if jobs.active_count() >= config.MAX_QUEUED_JOBS:
         raise HTTPException(503, "The studio is very busy right now. Please try again in a few minutes.")
     job = jobs.create(total=len(tts.split_lines(text)), fmt=req.format, voice=voice.id)
+    job.voice_name, job.excerpt, job.music = voice.name, text[:160], req.music
 
     async def run():
         try:
             async with _slots:
                 job.status = "running"
                 audio = await asyncio.to_thread(
-                    tts.synthesise, text, voice, req.speed, req.pause_ms,
-                    lambda done, total: setattr(job, "done", done))
+                    _render, text, voice, req, lambda done, total: setattr(job, "done", done))
                 job.data = await asyncio.to_thread(_encode, audio, req.format)
                 job.srt = tts.to_srt(audio)
             job.seconds = audio.seconds
@@ -135,6 +154,51 @@ async def job_srt(job_id: str):
                              headers={"Content-Disposition": f'attachment; filename="voicedost-{job.voice}.srt"'})
 
 
+@router.post("/jobs/{job_id}/share")
+async def share_job(job_id: str):
+    job = _job(job_id, need_done=True)
+    if job.share_id:
+        return {"id": job.share_id}
+    mp3 = job.data
+    if job.fmt != "mp3":
+        import io
+
+        import soundfile as sf
+        samples, _ = sf.read(io.BytesIO(job.data), dtype="float32")
+        mp3 = await asyncio.to_thread(tts.to_mp3, tts.Audio(samples))
+    job.share_id = await asyncio.to_thread(store.save_share, mp3, {
+        "voice": job.voice, "voice_name": job.voice_name, "seconds": round(job.seconds, 2),
+        "excerpt": job.excerpt, "music": job.music,
+    })
+    return {"id": job.share_id}
+
+
+@router.get("/shares/{share_id}")
+async def get_share(share_id: str):
+    meta = store.get_share(share_id)
+    if meta is None:
+        raise HTTPException(404, "This voiceover link has expired or does not exist.")
+    return meta
+
+
+@router.get("/shares/{share_id}/audio")
+async def share_audio(share_id: str):
+    path = store.share_audio_path(share_id)
+    if path is None:
+        raise HTTPException(404, "This voiceover link has expired or does not exist.")
+    return FileResponse(path, media_type="audio/mpeg", headers={"Cache-Control": "public, max-age=86400"})
+
+
+@router.get("/stats")
+async def site_stats():
+    return store.stats()
+
+
+@router.get("/music")
+async def music_tracks():
+    return [{"id": t.id, "name": t.name, "mood": t.mood} for t in TRACKS]
+
+
 def _job(job_id: str, need_done: bool = False) -> jobs.Job:
     job = jobs.get(job_id)
     if job is None:
@@ -151,7 +215,7 @@ async def _generate(req: TTSRequest, max_chars: int, user: CurrentUser | None,
     text, voice = await _check(req, max_chars, user, visitor_ip)
     async with _slots:
         try:
-            audio = await asyncio.to_thread(tts.synthesise, text, voice, req.speed, req.pause_ms)
+            audio = await asyncio.to_thread(_render, text, voice, req)
             data = await asyncio.to_thread(_encode, audio, req.format)
         except tts.EngineUnavailable as e:
             raise HTTPException(503, str(e))
@@ -182,4 +246,5 @@ async def generate(req: TTSRequest, request: Request, user: CurrentUser | None =
 async def try_it(req: TTSRequest, request: Request):
     ratelimit.check_try_limit(request)
     req.format = "mp3"
+    req.music = None
     return await _generate(req, config.TRY_MAX_CHARS, None)
