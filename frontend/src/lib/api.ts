@@ -10,6 +10,9 @@ export type GenerateOptions = {
   pauseMs?: number;
   format?: "mp3" | "wav";
   mode?: "try" | "tts";
+  /** Background music track id, and its volume (0 to 1). */
+  music?: string | null;
+  musicVolume?: number;
   /** Login token; required for the studio once accounts are on. */
   token?: string | null;
 };
@@ -104,7 +107,7 @@ export type JobStatus = {
   format: "mp3" | "wav";
 };
 
-export type JobResult = { audioUrl: string; srtUrl: string; job: JobStatus };
+export type JobResult = { audioUrl: string; srtUrl: string; audio: Blob; srt: string; job: JobStatus };
 
 async function errorMessage(res: Response): Promise<string> {
   try {
@@ -137,6 +140,8 @@ export async function generateWithProgress(
         speed: opts.speed ?? 1,
         pause_ms: opts.pauseMs ?? 350,
         format: opts.format ?? "mp3",
+        music: opts.music ?? null,
+        music_volume: opts.musicVolume ?? 0.5,
       }),
     });
   } catch {
@@ -167,9 +172,39 @@ export async function generateWithProgress(
   ]);
   if (!audio.ok) throw new Error(await errorMessage(audio));
   const srtText = srt.ok ? await srt.text() : "";
+  const audioBlob = await audio.blob();
   return {
-    audioUrl: URL.createObjectURL(await audio.blob()),
+    audioUrl: URL.createObjectURL(audioBlob),
     srtUrl: URL.createObjectURL(new Blob([srtText], { type: "application/x-subrip" })),
+    audio: audioBlob,
+    srt: srtText,
     job,
   };
+}
+
+/** Makes a public share link for a finished studio voiceover. */
+export async function createShare(jobId: string): Promise<string> {
+  const res = await fetch(`${API_URL}/jobs/${jobId}/share`, { method: "POST" });
+  if (!res.ok) throw new Error(await errorMessage(res));
+  return (await res.json()).id as string;
+}
+
+export type Share = { id: string; voice: string; voice_name: string; seconds: number; excerpt: string; music: string | null; created: number };
+
+export function shareUrl(id: string): string {
+  return `https://www.voicedost.com/s/${id}`;
+}
+
+export function shareAudioUrl(id: string): string {
+  return `${API_URL}/shares/${id}/audio`;
+}
+
+export async function fetchStats(): Promise<{ voiceovers: number; minutes: number } | null> {
+  if (!API_URL) return null;
+  try {
+    const res = await fetch(`${API_URL}/stats`);
+    return res.ok ? res.json() : null;
+  } catch {
+    return null;
+  }
 }

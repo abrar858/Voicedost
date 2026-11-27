@@ -1,10 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE } from "@/config/site";
 import { FeedbackButton } from "@/components/ui/FeedbackButton";
 
+export const viewport: Viewport = { themeColor: "#f97316" };
+
 export const metadata: Metadata = {
+  appleWebApp: { capable: true, title: "VoiceDost", statusBarStyle: "default" },
   metadataBase: new URL(SITE.url),
   title: { default: `${SITE.name} – Natural AI Voiceovers in English and Hindi`, template: `%s | ${SITE.name}` },
   description: SITE.description,

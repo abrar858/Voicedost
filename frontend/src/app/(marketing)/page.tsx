@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FEATURES } from "@/config/features";
+import { LiveCounter } from "@/components/marketing/LiveCounter";
 import { TryBox } from "@/components/marketing/TryBox";
 import { Faq, Pricing, SignupBand, Steps, VoiceCards } from "@/components/marketing/Sections";
 
@@ -21,6 +22,7 @@ export default function Home() {
             <Link href="/pricing" className="btn btn-outline">Plans from £3</Link>
           </div>
           <p className="muted">{FEATURES.accounts ? "No card needed for the free plan." : "30 free minutes every day while we launch. No sign-up needed."}</p>
+          <LiveCounter />
         </div>
         <TryBox defaultText="Welcome back to the channel! Today I'll show you three easy ways to save money on your weekly shop." />
       </section>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { AccountLink } from "@/components/account/AccountLink";
+import { InstallApp } from "@/components/ui/InstallApp";
 import { FOOTER_GROUPS, MAIN_NAV, PRODUCT_NAV, SITE } from "@/config/site";
 import { FEATURES } from "@/config/features";
 
@@ -29,7 +30,7 @@ export function ProductHeader() {
         {PRODUCT_NAV.filter((l) => FEATURES.accounts || l.href === "/studio").map((l) => (
           <Link key={l.href} href={l.href}>{l.label}</Link>
         ))}
-        <Link href="/pricing" className="btn btn-orange">Upgrade</Link>
+        {FEATURES.payments && <Link href="/pricing" className="btn btn-orange">Upgrade</Link>}
       </nav>
     </header>
   );
@@ -43,6 +44,7 @@ export function Footer() {
           <Logo />
           <span>{SITE.tagline}</span>
           <span>© 2026 {SITE.name}</span>
+          <InstallApp compact />
         </div>
         {FOOTER_GROUPS.map((g) => (
           <nav key={g.title} aria-label={g.title} className="footer-col">

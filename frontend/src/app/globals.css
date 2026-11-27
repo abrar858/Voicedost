@@ -123,3 +123,29 @@ button, input, textarea, select { font: inherit; }
 .feedback-panel textarea { min-height: 96px; width: 100%; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 12px; resize: vertical; }
 .feedback-toggle { box-shadow: 0 6px 20px rgba(20, 33, 61, 0.25); }
 .feedback-panel input { width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 12px; }
+
+/* Studio extras */
+.share-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn-whatsapp { background: #25d366; color: #0b2e18; border: 0; }
+.btn-whatsapp:hover { background: #1fb957; }
+.btn-small { min-height: 36px; padding: 6px 14px; font-size: 14px; }
+.music-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.music-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left;
+  padding: 10px 12px; border: 1.5px solid #d6dbe4; border-radius: 14px; background: #fff; cursor: pointer; font: inherit; color: inherit; }
+.music-item[aria-checked="true"] { border-color: var(--orange); background: #fff7ed; box-shadow: 0 0 0 1px var(--orange); }
+.music-item .muted { font-size: 13px; }
+.play { flex: none; width: 34px; height: 34px; border-radius: 999px; border: 0; background: var(--navy, #14213d); color: #fff; cursor: pointer; font-size: 12px; }
+.template-pick { display: flex; flex-direction: column; gap: 4px; }
+.template-pick select { min-height: 44px; border-radius: 12px; border: 1.5px solid #d6dbe4; padding: 0 12px; font: inherit; background: #fff; }
+.script-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px; }
+.recent-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.recent-item { border: 1px solid #e5e7eb; border-radius: 16px; padding: 14px; display: grid; gap: 10px; background: #fff; }
+.recent-excerpt { margin: 0; color: #4b5563; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@media (max-width: 340px) { .music-list { grid-template-columns: 1fr; } }
+
+/* Share page and counter */
+.share-card { gap: 16px; }
+.share-quote { margin: 0; padding: 14px 18px; border-left: 4px solid var(--orange); background: var(--cream); border-radius: 0 14px 14px 0; font-size: 19px; color: var(--ink-2); }
+.share-cta { margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--line); gap: 10px; }
+.live-counter { display: inline-flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); }
+.live-counter .dot { width: 10px; height: 10px; border-radius: 999px; background: #22c55e; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2); }
