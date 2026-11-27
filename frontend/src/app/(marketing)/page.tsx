@@ -2,20 +2,20 @@ import Link from "next/link";
 import { FEATURES } from "@/config/features";
 import { LiveCounter } from "@/components/marketing/LiveCounter";
 import { TryBox } from "@/components/marketing/TryBox";
-import { Faq, Pricing, SignupBand, Steps, VoiceCards } from "@/components/marketing/Sections";
+import { Faq, Features, Pricing, SignupBand, Steps, VoiceCards } from "@/components/marketing/Sections";
 
 export default function Home() {
   return (
     <>
       <section className="hero wrap">
         <div className="stack">
-          <span className="pill">English + Hindi AI voices</span>
+          <span className="pill">13 AI voices · English, Hindi & Urdu</span>
           <h1>
             Your voiceover <span className="accent">dost</span>.
           </h1>
           <p className="lead">
-            Paste your script, pick a natural voice and download an MP3 in seconds. Made for YouTube, Reels and
-            TikTok creators.
+            Paste your script, pick a natural voice and download an MP3 with subtitles and background music in
+            seconds. Made for YouTube, Reels and TikTok creators.
           </p>
           <div className="row">
             <Link href="/studio" className="btn btn-orange">{FEATURES.accounts ? "Try 60 minutes free" : "Open the studio free"}</Link>
@@ -27,6 +27,7 @@ export default function Home() {
         <TryBox defaultText="Welcome back to the channel! Today I'll show you three easy ways to save money on your weekly shop." />
       </section>
       <VoiceCards featured />
+      <Features />
       <Steps />
       <Pricing />
       <Faq />

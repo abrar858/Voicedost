@@ -43,6 +43,9 @@ export const FOOTER_GROUPS: { title: string; links: NavLink[] }[] = [
       { href: "/tools/hindi-text-to-speech", label: "Hindi text to speech" },
       { href: "/tools/ai-voiceover-for-youtube", label: "AI voiceover for YouTube" },
       { href: "/tools/british-accent-text-to-speech", label: "British accent text to speech" },
+      { href: "/tools/urdu-text-to-speech", label: "Urdu text to speech" },
+      { href: "/tools/voiceover-with-subtitles", label: "Voiceover with subtitles" },
+      { href: "/tools/podcast-voice-generator", label: "Podcast voice generator" },
     ],
   },
   {

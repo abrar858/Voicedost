@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FAQS, PLANS } from "@/content/plans";
 import { VOICES } from "@/content/voices";
 
-const FEATURED = ["grace", "george", "emma", "ryan", "hindi-female", "hindi-male"];
+const FEATURED = ["grace", "george", "emma", "ryan", "bella", "oliver", "hindi-female", "hindi-male"];
 
 export function VoiceCards({ heading = true, featured = false }: { heading?: boolean; featured?: boolean }) {
   const list = featured ? VOICES.filter((v) => FEATURED.includes(v.id)) : VOICES;
@@ -106,6 +106,37 @@ export function SignupBand() {
       <div className="cta">
         <h2>Your next video deserves a voice. Start free today.</h2>
         <Link href="/studio" className="btn btn-dark">Open the studio</Link>
+      </div>
+    </section>
+  );
+}
+
+const FEATURE_LIST = [
+  { icon: "🎙️", title: "13 natural voices", text: "British and American English plus Hindi, male and female, for every kind of video." },
+  { icon: "🇵🇰", title: "Urdu and Hindi script", text: "Type in Urdu or Hindi and it is read the way it should sound." },
+  { icon: "💬", title: "Subtitles included", text: "Every voiceover comes with a timed SRT file for YouTube, CapCut and Premiere." },
+  { icon: "🎵", title: "Background music", text: "Six copyright-free tracks that dip automatically while the voice speaks." },
+  { icon: "👥", title: "Several voices in one script", text: "Write Grace: and Ryan: before lines to make podcasts, stories and ads." },
+  { icon: "⏸️", title: "Pauses and pronunciation", text: "Add [pause 2s] anywhere and teach the voice how to say names." },
+  { icon: "📲", title: "Share on WhatsApp", text: "Send a link to your voiceover so friends and clients can listen instantly." },
+  { icon: "💾", title: "Saved on your phone", text: "Your last 10 voiceovers stay on your device, ready to download again." },
+];
+
+export function Features() {
+  return (
+    <section className="section" id="features">
+      <div className="wrap stack">
+        <h2>Everything a creator needs</h2>
+        <p className="lead">More than a voice: the extras that usually cost money elsewhere are built in.</p>
+        <div className="feature-grid">
+          {FEATURE_LIST.map((f) => (
+            <div key={f.title} className="feature">
+              <span className="feature-icon" aria-hidden>{f.icon}</span>
+              <strong>{f.title}</strong>
+              <span className="muted">{f.text}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
