@@ -30,6 +30,11 @@ router = APIRouter(tags=["tts"])
 _slots = asyncio.Semaphore(config.MAX_CONCURRENT_JOBS)
 
 
+class Pronunciation(BaseModel):
+    word: str = Field(..., min_length=1, max_length=60)
+    say: str = Field(..., min_length=1, max_length=60)
+
+
 class TTSRequest(BaseModel):
     text: str = Field(..., min_length=1)
     voice: str = "george"
@@ -38,6 +43,10 @@ class TTSRequest(BaseModel):
     format: Literal["mp3", "wav"] = "mp3"
     music: str | None = None  # background track id, or None for voice only
     music_volume: float = Field(0.5, ge=0, le=1)
+    pronunciations: list[Pronunciation] = Field(default_factory=list, max_length=50)
+
+    def lexicon(self) -> list[tuple[str, str]]:
+        return [(p.word, p.say) for p in self.pronunciations]
 
 
 async def _check(req: TTSRequest, max_chars: int, user: CurrentUser | None,
@@ -98,7 +107,7 @@ def _encode(audio: tts.Audio, fmt: str) -> bytes:
 
 
 def _render(text: str, voice: Voice, req: TTSRequest, on_progress=None) -> tts.Audio:
-    audio = tts.synthesise(text, voice, req.speed, req.pause_ms, on_progress)
+    audio = tts.synthesise(text, voice, req.speed, req.pause_ms, on_progress, req.lexicon())
     if req.music:
         audio = tts.add_music(audio, req.music, req.music_volume)
     return audio
@@ -112,7 +121,8 @@ async def start_job(req: TTSRequest, request: Request, user: CurrentUser | None 
     text, voice = await _check(req, config.MAX_CHARS, user, visitor_ip)
     if jobs.active_count() >= config.MAX_QUEUED_JOBS:
         raise HTTPException(503, "The studio is very busy right now. Please try again in a few minutes.")
-    job = jobs.create(total=len(tts.split_lines(text)), fmt=req.format, voice=voice.id)
+    segments = tts.parse_script(text, voice, VOICES_BY_ID, req.lexicon())
+    job = jobs.create(total=tts.count_speech(segments), fmt=req.format, voice=voice.id)
     job.voice_name, job.excerpt, job.music = voice.name, text[:160], req.music
 
     async def run():
@@ -229,7 +239,7 @@ async def _generate(req: TTSRequest, max_chars: int, user: CurrentUser | None,
         headers={
             "X-Audio-Seconds": f"{audio.seconds:.2f}",
             "X-Minutes-Used": str(round(audio.seconds / 60, 3)),
-            "X-Lines": str(len(tts.split_lines(text))),
+            "X-Lines": str(tts.count_speech(tts.parse_script(text, voice, VOICES_BY_ID))),
             "Content-Disposition": f'attachment; filename="voicedost-{voice.id}.{req.format}"',
             **extra,
         },
@@ -247,4 +257,5 @@ async def try_it(req: TTSRequest, request: Request):
     ratelimit.check_try_limit(request)
     req.format = "mp3"
     req.music = None
+    req.pronunciations = []
     return await _generate(req, config.TRY_MAX_CHARS, None)

@@ -12,19 +12,13 @@ import { TemplatePicker } from "./TemplatePicker";
 import { ShareActions } from "./ShareActions";
 import { RecentVoiceovers } from "./RecentVoiceovers";
 import { InstallApp } from "@/components/ui/InstallApp";
+import { readScript, voiceName } from "@/lib/script";
+import { Pronunciations, loadPronunciations, type Pron } from "./Pronunciations";
 
 const MAX_CHARS = 10000;
 /** Matches VOICEDOST_OPEN_STUDIO_MINUTES_PER_DAY on the voice server. */
 const FREE_DAILY_MINUTES = 30;
 
-function splitLines(script: string): string[] {
-  return script
-    .replace(/\r\n/g, "\n")
-    .split("\n")
-    .flatMap((block) => block.trim().split(/(?<=[۔؟])\s*(?=\S)|(?<=[.!?।])\s+/))
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
 
 export function Studio() {
   const { state, refresh } = useAccount();
@@ -42,6 +36,8 @@ export function Studio() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [music, setMusic] = useState<string | null>(null);
+  const [prons, setProns] = useState<Pron[]>([]);
+  useEffect(() => { const t = setTimeout(() => setProns(loadPronunciations()), 0); return () => clearTimeout(t); }, []);
   const [musicVolume, setMusicVolume] = useState(0.5);
   const [historyVersion, setHistoryVersion] = useState(0);
   const [result, setResult] = useState<(JobResult & { fmt: string; voice: string; historyId: string }) | null>(null);
@@ -55,7 +51,9 @@ export function Studio() {
     }
   }, [result]);
 
-  const lines = useMemo(() => splitLines(text), [text]);
+  const pieces = useMemo(() => readScript(text, voice), [text, voice]);
+  const lines = useMemo(() => pieces.filter((p) => p.kind === "speech"), [pieces]);
+  const speakers = useMemo(() => new Set(lines.map((l) => l.voice)), [lines]);
   const over = text.length > MAX_CHARS;
 
   async function onGenerate() {
@@ -64,7 +62,7 @@ export function Studio() {
     setProgress(null);
     try {
       const r = await generateWithProgress(
-        { text, voice, speed, pauseMs: pause, format, music, musicVolume, token: signedIn?.token },
+        { text, voice, speed, pauseMs: pause, format, music, musicVolume, pronunciations: prons, token: signedIn?.token },
         setProgress,
       );
       const historyId = r.job.id;
@@ -103,15 +101,28 @@ export function Studio() {
         <span className={over ? "error-light" : "muted"}>
           {text.length.toLocaleString()} / {MAX_CHARS.toLocaleString()} characters · about{" "}
           {formatMinutes(estimateSeconds(text.length, speed) / 60)} of audio · {lines.length} lines
+          {speakers.size > 1 && ` · ${speakers.size} voices`}
         </span>
         {lines.length > 0 && (
           <details>
             <summary className="muted" style={{ cursor: "pointer" }}>Show how your script is split into lines</summary>
             <ol className="lines">
-              {lines.map((l, i) => <li key={i}>{l}</li>)}
+              {pieces.map((p, i) => p.kind === "pause"
+                ? <li key={i} className="muted" style={{ listStyle: "none" }}>⏸ {p.seconds}s pause</li>
+                : <li key={i} dir="auto">{speakers.size > 1 && <strong>{voiceName(p.voice)}: </strong>}{p.text}</li>)}
             </ol>
           </details>
         )}
+        <details className="tips">
+          <summary className="muted" style={{ cursor: "pointer" }}>Tips: several voices, pauses and more</summary>
+          <ul className="tips-list">
+            <li><strong>Several voices:</strong> start a line with a voice name, e.g. <code>Grace: Welcome to the show!</code> then <code>Ryan: Thanks, Grace.</code> The voice stays until you name another.</li>
+            <li><strong>Pauses:</strong> add <code>[pause 2s]</code> anywhere, or <code>[pause]</code> for one second.</li>
+            <li><strong>Urdu and Hindi:</strong> type in Urdu or Hindi script and pick Priya, Arjun, Anaya or Rohan.</li>
+            <li><strong>Subtitles:</strong> every voiceover comes with a matching SRT file for YouTube and editors.</li>
+          </ul>
+        </details>
+        <Pronunciations value={prons} onChange={setProns} />
       </section>
 
       <aside className="panel" aria-label="Voice settings">

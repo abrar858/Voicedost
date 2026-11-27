@@ -204,3 +204,34 @@ def test_music_share_and_stats(tmp_path, monkeypatch):
         assert audio.status_code == 200 and len(audio.content) > 1000
         assert c.get("/shares/../../etc").status_code == 404
         assert c.get("/stats").json()["voiceovers"] >= 1
+
+
+def test_script_reader_speakers_pauses_and_pronunciation():
+    from app.core.voices import VOICES_BY_ID as V
+    segs = tts.parse_script("Grace: Hi there. [pause 2s] Welcome.\nRyan: Thanks!\nNote: still Ryan.\n[pause 20s]",
+                            V["george"], V, [("VoiceDost", "Voice Dost")])
+    kinds = [(s.kind, s.voice.id if s.voice else None) for s in segs]
+    assert kinds == [("speech", "grace"), ("pause", None), ("speech", "grace"),
+                     ("speech", "ryan"), ("speech", "ryan"), ("pause", None)]
+    assert segs[1].seconds == 2.0 and segs[-1].seconds == tts.MAX_PAUSE
+    say = tts.parse_script("Try VoiceDost today, voicedost rocks.", V["george"], V, [("VoiceDost", "Voice Dost")])
+    assert say[0].say == "Try Voice Dost today, Voice Dost rocks." and say[0].text.startswith("Try VoiceDost")
+
+
+@pytest.mark.skipif(not models_ready, reason="voice model not downloaded")
+def test_dialogue_job_subtitles_keep_original_text():
+    import time
+    from app.services import ratelimit
+    ratelimit._daily.clear()
+    with TestClient(app) as c:
+        job = c.post("/jobs", json={"text": "Grace: Hello VoiceDost. [pause 1s]\nRyan: Hi!", "voice": "george",
+                                    "pronunciations": [{"word": "VoiceDost", "say": "Voice Dost"}]}).json()
+        assert job["total"] == 2
+        for _ in range(120):
+            s = c.get(f"/jobs/{job['id']}").json()
+            if s["status"] in ("done", "error"):
+                break
+            time.sleep(0.25)
+        assert s["status"] == "done", s
+        srt = c.get(f"/jobs/{job['id']}/srt").text
+        assert "Hello VoiceDost." in srt and "Hi!" in srt and "Ryan:" not in srt

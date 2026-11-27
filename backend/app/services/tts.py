@@ -69,6 +69,81 @@ def split_lines(script: str) -> list[str]:
     return lines
 
 
+# ------------------------------------------------------------ script reader
+#
+#   Grace: Hello and welcome!          -> this line (and the next ones) in Grace's voice
+#   Let's begin. [pause 2s] Ready?     -> two seconds of silence in the middle
+#   Pronunciation fixes ("VoiceDost" -> "Voice Dost") change the audio, not subtitles.
+
+_PAUSE = re.compile(r"\[\s*pause(?:\s+(\d+(?:\.\d+)?)\s*(ms|s)?)?\s*\]", re.IGNORECASE)
+_SPEAKER = re.compile(r"^\s*([A-Za-z][A-Za-z\- ]{1,20})\s*[:：]\s*(.*)$")
+MAX_PAUSE = 10.0
+
+
+@dataclass
+class Segment:
+    kind: str           # "speech" or "pause"
+    text: str = ""      # what the subtitles show
+    say: str = ""       # what is spoken (after pronunciation fixes)
+    voice: Voice | None = None
+    seconds: float = 0.0
+
+
+def _pause_seconds(m: re.Match) -> float:
+    if not m.group(1):
+        return 1.0
+    value = float(m.group(1))
+    return min(value / 1000 if (m.group(2) or "s").lower() == "ms" else value, MAX_PAUSE)
+
+
+def _apply_lexicon(text: str, lexicon: list[tuple[str, str]]) -> str:
+    for word, say in lexicon:
+        if not word.strip():
+            continue
+        if re.fullmatch(r"[\w'-]+", word, re.ASCII):
+            text = re.sub(rf"(?<![\w]){re.escape(word)}(?![\w])", say, text, flags=re.IGNORECASE)
+        else:
+            text = text.replace(word, say)
+    return text
+
+
+def parse_script(script: str, default: Voice, voices: dict[str, Voice] | None = None,
+                 lexicon: list[tuple[str, str]] | None = None) -> list[Segment]:
+    """Turns a script into speech and pause segments, following speaker names."""
+    by_name = {}
+    for v in (voices or {}).values():
+        by_name[v.name.lower()] = v
+        by_name[v.id.lower()] = v
+    lexicon = lexicon or []
+    current = default
+    segments: list[Segment] = []
+    for block in script.replace("\r\n", "\n").split("\n"):
+        m = _SPEAKER.match(block)
+        if m and m.group(1).strip().lower() in by_name:
+            current = by_name[m.group(1).strip().lower()]
+            block = m.group(2)
+        pos = 0
+        pieces: list[tuple[str, float]] = []
+        for pm in _PAUSE.finditer(block):
+            pieces.append((block[pos:pm.start()], 0.0))
+            pieces.append(("", _pause_seconds(pm)))
+            pos = pm.end()
+        pieces.append((block[pos:], 0.0))
+        for text, pause in pieces:
+            if pause:
+                segments.append(Segment("pause", seconds=pause))
+                continue
+            for sentence in _SENTENCE_END.split(text.strip()):
+                sentence = sentence.strip()
+                if sentence and re.search(r"\w", sentence):
+                    segments.append(Segment("speech", sentence, _apply_lexicon(sentence, lexicon), current))
+    return segments
+
+
+def count_speech(segments: list[Segment]) -> int:
+    return sum(1 for s in segments if s.kind == "speech")
+
+
 def estimate_seconds(text: str, speed: float = 1.0) -> float:
     """Rough audio length before generating (about 1,070 characters a minute at 1.0x)."""
     return len(text) / 1070 * 60 / max(speed, 0.1)
@@ -93,29 +168,42 @@ class Audio:
 
 
 def synthesise(script: str, voice: Voice, speed: float = 1.0, pause_ms: int = 350,
-               on_progress: Callable[[int, int], None] | None = None) -> Audio:
-    lines = split_lines(script)
-    if not lines:
+               on_progress: Callable[[int, int], None] | None = None,
+               lexicon: list[tuple[str, str]] | None = None) -> Audio:
+    from ..core.voices import VOICES_BY_ID
+
+    segments = parse_script(script, voice, VOICES_BY_ID, lexicon)
+    total = count_speech(segments)
+    if not total:
         raise ValueError("Script is empty.")
     engine = get_engine()
     gap = np.zeros(int(SAMPLE_RATE * pause_ms / 1000), dtype=np.float32)
     parts: list[np.ndarray] = []
     cues: list[Cue] = []
-    t = 0.0
-    for i, line in enumerate(lines):
-        samples, sr = engine.create(line, voice=voice.kokoro_voice, speed=speed, lang=lang_for(line, voice))
+    t, done, prev_speech = 0.0, 0, False
+    for seg in segments:
+        if seg.kind == "pause":
+            silence = np.zeros(int(SAMPLE_RATE * seg.seconds), dtype=np.float32)
+            parts.append(silence)
+            t += len(silence) / SAMPLE_RATE
+            prev_speech = False
+            continue
+        if prev_speech:
+            parts.append(gap)
+            t += len(gap) / SAMPLE_RATE
+        v = seg.voice or voice
+        samples, sr = engine.create(seg.say, voice=v.kokoro_voice, speed=speed, lang=lang_for(seg.say, v))
         if sr != SAMPLE_RATE:
             raise RuntimeError(f"Unexpected sample rate {sr}")
         arr = np.asarray(samples, dtype=np.float32)
         parts.append(arr)
         dur = len(arr) / SAMPLE_RATE
-        cues.append(Cue(t, t + dur, line))
+        cues.append(Cue(t, t + dur, seg.text))
         t += dur
-        if i < len(lines) - 1:
-            parts.append(gap)
-            t += len(gap) / SAMPLE_RATE
+        prev_speech = True
+        done += 1
         if on_progress:
-            on_progress(i + 1, len(lines))
+            on_progress(done, total)
     return Audio(np.concatenate(parts), cues=cues)
 
 

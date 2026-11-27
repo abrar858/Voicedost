@@ -13,6 +13,8 @@ export type GenerateOptions = {
   /** Background music track id, and its volume (0 to 1). */
   music?: string | null;
   musicVolume?: number;
+  /** Pronunciation fixes: say `word` as `say`. */
+  pronunciations?: { word: string; say: string }[];
   /** Login token; required for the studio once accounts are on. */
   token?: string | null;
 };
@@ -142,6 +144,7 @@ export async function generateWithProgress(
         format: opts.format ?? "mp3",
         music: opts.music ?? null,
         music_volume: opts.musicVolume ?? 0.5,
+        pronunciations: opts.pronunciations ?? [],
       }),
     });
   } catch {

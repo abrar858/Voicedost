@@ -18,6 +18,10 @@ export const TEMPLATES: Template[] = [
     text: "And that's it for today's video!\nIf you found it helpful, give it a like, it really helps the channel.\nDon't forget to subscribe and turn on notifications, so you never miss a new video.\nThank you for watching, and I'll see you in the next one.",
   },
   {
+    id: "podcast", title: "Podcast conversation (2 voices)", language: "English", voice: "grace", music: "lofi",
+    text: "Grace: Welcome to Creator Talk, the show for new YouTubers. I'm Grace.\nRyan: And I'm Ryan. Today's big question: do you need to show your face to grow a channel?\nGrace: Short answer? No. Some of the biggest channels never show a face at all. [pause 1s]\nRyan: So what do they do instead?\nGrace: Great scripts, clear voiceovers, and simple visuals. Let's break it down.",
+  },
+  {
     id: "motivation", title: "Motivational Short", language: "English", voice: "ryan", music: "cinematic",
     text: "Nobody is coming to save you.\nNot your friends. Not luck. Not tomorrow.\nEvery big change starts with one small step, taken today.\nWake up a little earlier. Work a little harder. Quit a little less.\nOne year from now, you'll wish you had started today.\nSo start. Right now.",
   },
