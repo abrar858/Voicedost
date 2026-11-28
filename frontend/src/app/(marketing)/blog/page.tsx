@@ -4,7 +4,8 @@ import { PageIntro } from "@/components/ui/ComingSoon";
 import { BLOG_POSTS } from "@/content/pages";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Creator Guides: Scripts, Voiceovers and YouTube",
+  alternates: { canonical: "/blog" },
   description: "Guides for creators: scripts, voiceovers and growing your channel.",
 };
 
