@@ -4,7 +4,8 @@ import { PageIntro } from "@/components/ui/ComingSoon";
 import { USE_CASES } from "@/content/pages";
 
 export const metadata: Metadata = {
-  title: "Use cases",
+  title: "AI Voiceovers for YouTube, Reels, Training and Ads",
+  alternates: { canonical: "/use-cases" },
   description: "How creators and businesses use VoiceDost: faceless YouTube, Reels and Shorts, training videos and ads.",
 };
 

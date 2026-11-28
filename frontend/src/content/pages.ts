@@ -23,6 +23,11 @@ export const TOOL_PAGES: ToolPage[] = [
     defaultVoice: "hindi-female",
     sample: "नमस्ते दोस्तों! आज के वीडियो में हम सीखेंगे कुछ आसान टिप्स।",
     tips: ["Write in Devanagari script for the best pronunciation.", "Use full stops (।) to add natural pauses.", "Keep sentences short for clear narration."],
+    faq: [
+      { q: "Is the Hindi text to speech free?", a: "Yes. You get 30 free minutes every day, with no sign-up and no card." },
+      { q: "Which Hindi voices are there?", a: "Four: Priya and Anaya (female) and Arjun and Rohan (male). All four also read Urdu script." },
+      { q: "Can I use the Hindi voiceover in monetised videos?", a: "Yes. You can use your voiceovers in monetised YouTube, TikTok, Reels and Facebook videos." },
+    ],
   },
   {
     slug: "ai-voiceover-for-youtube",
@@ -32,6 +37,11 @@ export const TOOL_PAGES: ToolPage[] = [
     defaultVoice: "george",
     sample: "Welcome back to the channel! Today we're looking at three facts you probably didn't know.",
     tips: ["Split your script into short lines so you can redo any line.", "Use a slightly slower speed for explainers.", "Add a pause between sections to give viewers time."],
+    faq: [
+      { q: "Can I monetise YouTube videos with an AI voiceover?", a: "Yes. AI voices are allowed. YouTube doesn't pay for mass-produced or repetitive videos, so add your own research and angle to every video." },
+      { q: "How long can a voiceover be?", a: "The studio takes up to 10,000 characters per voiceover, about 9 minutes of audio. For longer videos, split the script into parts." },
+      { q: "Do I get subtitles for my video?", a: "Yes. Every studio voiceover comes with a matching SRT subtitle file for YouTube, CapCut and Premiere." },
+    ],
   },
   {
     slug: "british-accent-text-to-speech",
@@ -41,6 +51,11 @@ export const TOOL_PAGES: ToolPage[] = [
     defaultVoice: "emma",
     sample: "Good morning, and welcome to today's lesson. Let's get started.",
     tips: ["George suits calm narration; Emma suits friendly tutorials.", "British spellings like 'colour' read naturally.", "Write numbers as words if you want them read a certain way."],
+    faq: [
+      { q: "Which British voices are there?", a: "Four: George and Oliver (male) and Emma and Isabella (female)." },
+      { q: "Are there American voices too?", a: "Yes. Grace, Bella, Michael, Ryan and Jake speak American English." },
+      { q: "Can I use a British AI voice in adverts and courses?", a: "Yes, including monetised YouTube videos and adverts." },
+    ],
   },
   {
     slug: "urdu-text-to-speech",
@@ -59,7 +74,7 @@ export const TOOL_PAGES: ToolPage[] = [
   },
   {
     slug: "podcast-voice-generator",
-    title: "AI Podcast & Dialogue Voice Generator – Several Voices, Free | VoiceDost",
+    title: "AI Podcast Voice Generator – Multiple Voices, Free | VoiceDost",
     h1: "AI podcast and dialogue voices",
     intro: "Make conversations with several AI voices in one go. Write each line after a name like Grace: or Ryan: and VoiceDost switches voices for you.",
     defaultVoice: "grace",
@@ -72,7 +87,7 @@ export const TOOL_PAGES: ToolPage[] = [
   },
   {
     slug: "voiceover-with-subtitles",
-    title: "Free AI Voiceover with Subtitles (SRT) – Text to Speech | VoiceDost",
+    title: "Free AI Voiceover with SRT Subtitles | VoiceDost",
     h1: "Voiceover with subtitles, free",
     intro: "Turn a script into a natural voiceover and get a perfectly timed SRT subtitle file with it. Drop both into CapCut, Premiere or YouTube.",
     defaultVoice: "grace",
@@ -85,7 +100,7 @@ export const TOOL_PAGES: ToolPage[] = [
   },
   {
     slug: "free-ai-voice-generator",
-    title: "Free AI Voice Generator – 13 Natural Voices, No Sign-up | VoiceDost",
+    title: "Free AI Voice Generator – 13 Voices, No Sign-up | VoiceDost",
     h1: "Free AI voice generator",
     intro: "13 natural AI voices in British and American English, Hindi and Urdu script. Add background music, download MP3 or WAV, and get subtitles too.",
     defaultVoice: "grace",
@@ -99,7 +114,7 @@ export const TOOL_PAGES: ToolPage[] = [
   },
 ];
 
-export type UseCase = { slug: string; title: string; h1: string; intro: string; points: string[]; voice: string; sample: string };
+export type UseCase = { slug: string; title: string; h1: string; intro: string; points: string[]; voice: string; sample: string; faq?: { q: string; a: string }[] };
 
 export const USE_CASES: UseCase[] = [
   {
@@ -110,6 +125,10 @@ export const USE_CASES: UseCase[] = [
     points: ["One consistent narrator for your whole channel", "Redo a single line instead of re-recording", "1,000 minutes a month on Creator covers over a hundred 8-minute videos"],
     voice: "george",
     sample: "Welcome back! In today's video we uncover the story behind one of history's strangest mysteries.",
+    faq: [
+      { q: "Will YouTube monetise a channel that uses an AI voice?", a: "AI voices are allowed. What YouTube doesn't pay for is mass-produced, repetitive content, so research each video and add your own angle." },
+      { q: "Can I keep the same voice for every video?", a: "Yes. Pick one voice, such as George or Grace, and use it for every upload so viewers recognise your channel." },
+    ],
   },
   {
     slug: "reels-and-shorts",
@@ -119,6 +138,10 @@ export const USE_CASES: UseCase[] = [
     points: ["Hindi and English voices", "Speed control for fast-paced edits", "MP3 ready for CapCut, InShot or Premiere"],
     voice: "hindi-male",
     sample: "रुकिए! यह वीडियो आपका बहुत समय बचाएगा।",
+    faq: [
+      { q: "How long should a Shorts or Reels voiceover be?", a: "About 40 to 150 words, which is roughly 15 to 60 seconds." },
+      { q: "Can I make the voice faster for Shorts?", a: "Yes. Set the speed in the studio: 1.0× to 1.1× suits fast Shorts." },
+    ],
   },
   {
     slug: "training-and-education",
@@ -128,6 +151,10 @@ export const USE_CASES: UseCase[] = [
     points: ["Calm, clear delivery for learning", "Update a lesson by changing one line", "WAV downloads for course platforms"],
     voice: "emma",
     sample: "In this lesson, we'll cover the three steps to get started safely.",
+    faq: [
+      { q: "Can I update one part of a lesson later?", a: "Yes. Change the line in your script and make the voiceover again. There's nothing to re-record." },
+      { q: "Do I get subtitles for accessibility?", a: "Yes. Every studio voiceover comes with a matching SRT subtitle file." },
+    ],
   },
   {
     slug: "small-business",
@@ -137,6 +164,10 @@ export const USE_CASES: UseCase[] = [
     points: ["Confident voices for ads", "Make variations to test which ad works", "Low monthly cost"],
     voice: "michael",
     sample: "Big savings this weekend only. Visit us in store or order online today.",
+    faq: [
+      { q: "Can I use the voiceover in adverts?", a: "Yes, including monetised YouTube videos and adverts." },
+      { q: "Is the background music free to use?", a: "Yes. Our tracks are made by us and free to use in your videos, including monetised ones." },
+    ],
   },
 ];
 
@@ -168,12 +199,13 @@ export const SERVICES: Service[] = [
  * Blog body: one string per paragraph. A string starting "## " is a heading,
  * and a string starting "- " is a bullet point.
  */
-export type BlogPost = { slug: string; title: string; summary: string; date: string; body: string[] };
+export type BlogPost = { slug: string; title: string; /** Shorter title for search results (defaults to title). */ seoTitle?: string; summary: string; date: string; body: string[] };
 
 export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "start-faceless-youtube-channel-pakistan",
     title: "How to start a faceless YouTube channel from Pakistan (2026 guide)",
+    seoTitle: "Faceless YouTube Channel from Pakistan: 2026 Guide",
     summary: "Pick a niche, write scripts, add a voiceover and reach monetisation, without ever showing your face. Includes the new 2027 YouTube rules.",
     date: "26 November 2026",
     body: [
@@ -201,6 +233,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "write-youtube-script-that-keeps-viewers",
     title: "How to write a YouTube script that keeps people watching",
+    seoTitle: "Write a YouTube Script That Keeps Viewers Watching",
     summary: "A simple 5-part structure for scripts that hold attention, with a ready-made example you can copy into the studio.",
     date: "26 November 2026",
     body: [

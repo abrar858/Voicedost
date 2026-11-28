@@ -5,8 +5,9 @@ import { SignupBand, VoiceCards } from "@/components/marketing/Sections";
 import { VOICES } from "@/content/voices";
 
 export const metadata: Metadata = {
-  title: "AI Voices in English and Hindi",
-  description: "Listen to every VoiceDost voice: British and American English, plus male and female Hindi.",
+  title: "13 AI Voices: British, American English, Hindi & Urdu",
+  description: "Listen to all 13 VoiceDost voices: British and American English, and male and female Hindi voices that also read Urdu script. Try any voice free.",
+  alternates: { canonical: "/voices" },
 };
 
 export default function VoicesPage() {

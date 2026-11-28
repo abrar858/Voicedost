@@ -4,8 +4,9 @@ import { PageIntro } from "@/components/ui/ComingSoon";
 import { TOOL_PAGES } from "@/content/pages";
 
 export const metadata: Metadata = {
-  title: "Free voice tools",
-  description: "Free text-to-speech tools in Hindi and English. No sign-up needed.",
+  title: "Free Text to Speech Tools: Hindi, Urdu, English",
+  description: "Free text-to-speech tools in Hindi, Urdu and English: AI voiceovers for YouTube, subtitles, podcasts and British accents. No sign-up needed.",
+  alternates: { canonical: "/tools" },
 };
 
 export default function ToolsPage() {

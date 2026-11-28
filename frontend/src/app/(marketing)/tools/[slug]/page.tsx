@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TryBox } from "@/components/marketing/TryBox";
 import { TOOL_PAGES } from "@/content/pages";
+import { SITE } from "@/config/site";
+import { JsonLd, breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 
 export function generateStaticParams() {
   return TOOL_PAGES.map((t) => ({ slug: t.slug }));
@@ -26,6 +28,7 @@ export default async function ToolPage({ params }: PageProps<"/tools/[slug]">) {
 
   return (
     <>
+      <JsonLd data={breadcrumbLd(SITE.url, [["Home", "/"], ["Free tools", "/tools"], [page.h1, `/tools/${page.slug}`]])} />
       <section className="hero wrap">
         <div className="stack">
           <span className="pill">Free tool · no sign-up</span>
@@ -58,10 +61,7 @@ export default async function ToolPage({ params }: PageProps<"/tools/[slug]">) {
                 <p>{f.a}</p>
               </details>
             ))}
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-              "@context": "https://schema.org", "@type": "FAQPage",
-              mainEntity: page.faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
-            }) }} />
+            <JsonLd data={faqLd(page.faq)} />
           </div>
         </section>
       )}

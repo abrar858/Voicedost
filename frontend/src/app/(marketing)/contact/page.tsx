@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/ui/ComingSoon";
 import { SITE } from "@/config/site";
 
-export const metadata: Metadata = { title: "Contact", description: "Get in touch with VoiceDost." };
+export const metadata: Metadata = {
+  title: { absolute: "Contact VoiceDost" },
+  description: "Contact VoiceDost about AI voiceovers, plans, partnerships or done-for-you voiceover and video services. We usually reply within one working day.",
+  alternates: { canonical: "/contact" },
+};
 
 export default function ContactPage() {
   return (
@@ -10,7 +14,7 @@ export default function ContactPage() {
       <div className="row">
         <a className="btn btn-dark" href={`mailto:${SITE.email}`}>Email {SITE.email}</a>
       </div>
-      <p className="muted">[ADD] Business address once the company is registered.</p>
+      {/* [ADD] Business address once the company is registered. */}
     </PageIntro>
   );
 }

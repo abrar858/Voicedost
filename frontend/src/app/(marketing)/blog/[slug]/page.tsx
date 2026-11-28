@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
   const { slug } = await params;
   const post = BLOG_POSTS.find((p) => p.slug === slug);
   return post
-    ? { title: post.title, description: post.summary, alternates: { canonical: `/blog/${post.slug}` }, openGraph: { type: "article", title: post.title, description: post.summary, images: ["/og.png"] } }
+    ? { title: post.seoTitle ?? post.title, description: post.summary, alternates: { canonical: `/blog/${post.slug}` }, openGraph: { type: "article", title: post.title, description: post.summary, images: ["/og.png"] } }
     : {};
 }
 

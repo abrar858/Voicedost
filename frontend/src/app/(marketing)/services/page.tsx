@@ -6,6 +6,7 @@ import { SITE } from "@/config/site";
 export const metadata: Metadata = {
   title: "Done-for-you voiceovers and videos",
   description: "Too busy? We write, voice and animate your videos for you, in English or Hindi.",
+  alternates: { canonical: "/services" },
 };
 
 export default function ServicesPage() {
@@ -25,7 +26,7 @@ export default function ServicesPage() {
               <ul style={{ margin: 0, paddingLeft: 20 }}>
                 {s.includes.map((i) => <li key={i}>{i}</li>)}
               </ul>
-              <strong style={{ fontSize: 20 }}>{s.price}</strong>
+              <strong style={{ fontSize: 20 }}>{s.price.startsWith("[") ? "Price on request" : s.price}</strong>
               <a className="btn btn-dark" href={`mailto:${SITE.email}?subject=${encodeURIComponent(s.name)}`}>Ask for a quote</a>
             </div>
           ))}
